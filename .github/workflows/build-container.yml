@@ -35,7 +35,7 @@ jobs:
           DOCKER_BUILDKIT=1 docker build -f Dockerfile.core . -t ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/core:${{ steps.get_version.outputs.VERSION }}
           docker push ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/core:${{ steps.get_version.outputs.VERSION }}
 
-      - name: Build and push frontend
+      - name: Build and push web
         run: |
           DOCKER_BUILDKIT=1 docker build -f Dockerfile.web . -t ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/web:${{ steps.get_version.outputs.VERSION }}
           docker push ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/web:${{ steps.get_version.outputs.VERSION }}
