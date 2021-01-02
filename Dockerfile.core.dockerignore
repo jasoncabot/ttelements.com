@@ -1,0 +1,12 @@
+.github
+node_modules
+npm-debug.log
+.env
+.gitignore
+.git
+.DS_Store
+LICENSE
+README.md
+Dockerfile.*
+api
+web

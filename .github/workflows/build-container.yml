@@ -27,15 +27,15 @@ jobs:
 
       - name: Build and push api
         run: |
-          DOCKER_BUILDKIT=1 docker build -f Dockerfile.api . -t ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/api:${{ steps.get_version.outputs.VERSION }}
+          DOCKER_BUILDKIT=1 docker build -f Dockerfile.api api -t ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/api:${{ steps.get_version.outputs.VERSION }}
           docker push ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/api:${{ steps.get_version.outputs.VERSION }}
 
       - name: Build and push core
         run: |
-          DOCKER_BUILDKIT=1 docker build -f Dockerfile.core . -t ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/core:${{ steps.get_version.outputs.VERSION }}
+          DOCKER_BUILDKIT=1 docker build -f Dockerfile.core core -t ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/core:${{ steps.get_version.outputs.VERSION }}
           docker push ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/core:${{ steps.get_version.outputs.VERSION }}
 
       - name: Build and push web
         run: |
-          DOCKER_BUILDKIT=1 docker build -f Dockerfile.web . -t ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/web:${{ steps.get_version.outputs.VERSION }}
+          DOCKER_BUILDKIT=1 docker build -f Dockerfile.web web -t ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/web:${{ steps.get_version.outputs.VERSION }}
           docker push ${{ secrets.REGISTRY_HOST }}/${{ github.event.repository.name }}/web:${{ steps.get_version.outputs.VERSION }}
