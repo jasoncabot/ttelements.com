@@ -1,5 +1,5 @@
-import { greeter } from "@/index";
+import { CardKinds } from "@/index";
 
-test("Should greet with the correct name", () => {
-    expect(greeter()).toBe("Hello World");
+test("Should have the right number of cards", () => {
+    expect(CardKinds.length).toBe(110);
 });

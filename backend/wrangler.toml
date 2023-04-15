@@ -6,3 +6,27 @@ compatibility_flags = []
 
 [build]
 command = "node build.js"
+
+[durable_objects]
+bindings = [
+  { name = "GAME", class_name = "Game" },
+  { name = "USER", class_name = "User" },
+  { name = "CARD_COLLECTION", class_name = "CardCollection" }
+]
+
+[[kv_namespaces]]
+id = "26b5d2a435e146fe904652c2cab4d62d"
+binding = "ACCESS_TOKENS"
+
+[[kv_namespaces]]
+id = "e1e4429a6994412c9507bf899d6e728e"
+binding = "SOCKET_TOKENS" 
+
+[[migrations]]
+tag = "v1"
+new_classes = ["Game", "User", "CardCollection"]
+
+[miniflare]
+kv_persist = true
+cache_persist = true
+durable_objects_persist = true

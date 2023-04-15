@@ -1,0 +1,197 @@
+@playerId = {{$guid}}
+@player2Id = {{$guid}}
+
+### Version check
+GET http://mac.lan:8787/version
+
+### Register email
+# @name p1Signup
+POST http://mac.lan:8787/user_signup
+Content-type: application/json
+
+{
+    "email": "player1@example.com",
+    "client_id": "TEST-D7BDCC396649"
+}
+
+### Confirm email registration
+# @name p1Confirm
+POST http://mac.lan:8787/users
+Content-type: application/json
+
+{
+    "email": "player1@example.com",
+    "code": "62CF9D",
+    "password": "password",
+    "client_id": "TEST-D7BDCC396649"
+}
+
+### Register player2
+# @name p2Signup
+POST http://mac.lan:8787/user_signup
+Content-type: application/json
+
+{
+    "email": "player2@example.com",
+    "client_id": "TEST-D7BDCC396649"
+}
+
+### Confirm email registration
+# @name p2Confirm
+POST http://mac.lan:8787/users
+Content-type: application/json
+
+{
+    "email": "player2@example.com",
+    "code": "F25024",
+    "password": "password",
+    "client_id": "TEST-D7BDCC396649"
+}
+
+### Login as player1
+# @name login1
+POST http://mac.lan:8787/oauth/auth
+Content-type: application/json
+
+{
+    "grant_type": "password",
+    "email": "player1@example.com",
+    "password": "password",
+    "client_id": "TEST-D7BDCC396649"
+}
+
+### Login as player2
+# @name login2
+POST http://mac.lan:8787/oauth/auth
+Content-type: application/json
+
+{
+    "grant_type": "password",
+    "email": "player2@example.com",
+    "password": "password",
+    "client_id": "TEST-D7BDCC396649"
+}
+
+### Refresh token for player1
+# @name refresh1
+POST http://mac.lan:8787/oauth/token
+Content-type: application/json
+
+{
+    "grant_type": "refresh_token",
+    "refresh_token": "{{login1.response.body.refresh_token}}",
+    "client_id": "TEST-D7BDCC396649"
+}
+
+### Refresh token for player2
+# @name refresh2
+POST http://mac.lan:8787/oauth/token
+Content-type: application/json
+
+{
+    "grant_type": "refresh_token",
+    "refresh_token": "{{login2.response.body.refresh_token}}",
+    "client_id": "TEST-D7BDCC396649"
+}
+
+
+### List games
+# @name listGames
+GET http://mac.lan:8787/games
+Content-Type: application/json
+Authorization: Bearer {{login1.response.body.access_token}}
+
+
+### Create a game
+# @name createGame
+POST http://mac.lan:8787/games
+Content-Type: application/json
+Authorization: Bearer {{login1.response.body.access_token}}
+
+{
+  "rules": ["open", "random"],
+  "tradeRule": "one"
+}
+
+
+### Join a game
+# @name joinGame
+POST http://mac.lan:8787/games/{{createGame.response.body.id}}/player
+Content-Type: application/json
+Authorization: Bearer {{login2.response.body.access_token}}
+
+{
+}
+
+
+### View my cards
+# @name viewMyCards
+GET http://mac.lan:8787/cards
+Content-Type: application/json
+Authorization: Bearer {{login1.response.body.access_token}}
+
+
+### Reset my cards
+POST http://mac.lan:8787/starter_pack
+Content-Type: application/json
+Authorization: Bearer {{login1.response.body.access_token}}
+
+
+### View Joinable games
+# @name viewJoinableGames
+GET http://mac.lan:8787/waiting-games
+Content-Type: application/json
+Authorization: Bearer {{login2.response.body.access_token}}
+
+### Join game
+# @name joinGames
+POST http://mac.lan:8787/games/{{viewJoinableGames.response.body.games[0].id}}/player
+Content-Type: application/json
+Authorization: Bearer {{login2.response.body.access_token}}
+
+{
+}
+
+### Get p1 details
+# @name getP1Details
+GET http://mac.lan:8787/user/details
+Content-Type: application/json
+Authorization: Bearer {{login1.response.body.access_token}}
+
+### Get p2 details
+# @name getP2Details
+GET http://mac.lan:8787/user/details
+Content-Type: application/json
+Authorization: Bearer {{login2.response.body.access_token}}
+
+### Purchase basic pack
+POST http://mac.lan:8787/purchase
+Content-Type: application/json
+Authorization: Bearer {{login1.response.body.access_token}}
+
+{
+    "type": "pack",
+    "kind": "basic"
+}
+
+### Show game
+# @name showGame
+GET http://mac.lan:8787/games/{{createGame.response.body.id}}
+Content-Type: application/json
+Authorization: Bearer {{login1.response.body.access_token}}
+
+### Create websocket token for this user
+# @name createWSToken
+POST http://mac.lan:8787/games/{{showGame.response.body.id}}/ws
+Content-Type: application/json
+Authorization: Bearer {{login1.response.body.access_token}}
+
+{
+    
+}
+
+### Connect to websocket
+# @name connectWS
+GET http://mac.lan:8787/games/{{showGame.response.body.id}}/ws?token={{createWSToken.response.body.token}}
+Content-Type: application/json
+Authorization: Bearer {{login1.response.body.access_token}}

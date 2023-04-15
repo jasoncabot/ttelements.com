@@ -1,29 +1,18 @@
 {
-    "compilerOptions": {
-        "target": "esnext",
-        "module": "esnext",
-        "lib": [
-            "esnext"
-        ],
-        "types": [
-            "@cloudflare/workers-types"
-        ],
-        "moduleResolution": "node",
-        "strict": true,
-        "noEmit": true,
-        "esModuleInterop": true,
-        "baseUrl": "./",
-        "paths": {
-            "@/*": [
-                "src/*"
-            ],
-            "@app/shared": [
-                "./../shared/src/index.ts"
-            ]
-        }
-    },
-    "include": [
-        "src/**/*",
-        "bindings.d.ts"
-    ]
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext"],
+    "types": ["@cloudflare/workers-types"],
+    "moduleResolution": "node",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "paths": {
+      "@ttelements/backend/*": ["src/*"],
+      "@ttelements/shared": ["./../shared/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*", "bindings.d.ts"]
 }
