@@ -81,7 +81,8 @@ const Library = () => {
       }
     };
     fetchCards();
-  }, [fetchData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex min-h-screen w-full flex-col p-4 md:p-12">

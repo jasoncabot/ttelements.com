@@ -1,7 +1,6 @@
 import { LockClosedIcon, UserCircleIcon } from "@heroicons/react/24/outline";
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../providers/AuthProvider";
 
 interface Props {}
 

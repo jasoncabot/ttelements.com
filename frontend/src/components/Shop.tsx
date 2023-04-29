@@ -55,7 +55,8 @@ const Shop = () => {
       }
     };
     fetchUserDetails();
-  }, [fetchData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [purchased, setPurchased] = useState<ViewableCardResponse[]>([]);
   const handlePurchase = async (event: SyntheticEvent, pack: PackKey) => {

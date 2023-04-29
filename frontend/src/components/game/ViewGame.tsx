@@ -43,7 +43,8 @@ const ViewGame = () => {
     if (gameId) {
       fetchGame();
     }
-  }, [gameId, fetchData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameId]);
 
   const [socketToken, setSocketToken] = useState<string | null>(null);
   useEffect(() => {
@@ -64,7 +65,8 @@ const ViewGame = () => {
     if (gameId) {
       createSocketToken();
     }
-  }, [gameId, fetchData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameId]);
 
   const handleEventReceived = (event: GameEvent) => {
     switch (event.type) {
@@ -115,6 +117,7 @@ const ViewGame = () => {
       socket?.close();
       setSocket(null);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socketToken]);
 
   const sendCommand = (command: GameCommand) => {
@@ -289,6 +292,7 @@ const TradingView: React.FC<{
       }
     };
     fetchCards();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <CardSelectionView cards={cards} onCardsChosen={onCardsChosen} />;
@@ -317,6 +321,7 @@ const PickInProgressView: React.FC<{
       }
     };
     fetchCards();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <CardSelectionView cards={cards} onCardsChosen={onCardsChosen} />;

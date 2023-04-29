@@ -2,7 +2,6 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import { useEffect, useState } from "react";
 import { classNames } from "..";
 import { scoreImage } from "../../images/cards";
-import { Transition } from "@headlessui/react";
 
 const ScoreBoard: React.FC<{
   isMyTurn: boolean;

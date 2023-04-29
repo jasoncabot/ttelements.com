@@ -215,7 +215,8 @@ const GameOptions = () => {
       }
     };
     loadGames();
-  }, [showMessage, fetchData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex min-h-screen w-full flex-col p-4 md:flex-row md:p-12">
