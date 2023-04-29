@@ -52,4 +52,4 @@ jobs:
           workingDirectory: 'frontend'
           command: pages publish --project-name=$SITE dist
         env:
-          SITE: ${{ github.event.repository.name }}
+          SITE: ttelements-com
