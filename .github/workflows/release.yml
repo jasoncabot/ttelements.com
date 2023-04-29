@@ -21,17 +21,20 @@ jobs:
         run: |
           yarn
           yarn build
+          yarn link
           CI=true yarn test
       - name: Build Frontend
         working-directory: ./frontend
         run: |
           yarn
           yarn build
+          yarn link @ttelements/shared
           CI=true yarn test
       - name: Build Backend
         working-directory: ./backend
         run: |
           yarn
+          yarn link @ttelements/shared
           yarn build
           yarn test
       - name: Publish Backend
