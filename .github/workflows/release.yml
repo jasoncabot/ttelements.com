@@ -27,8 +27,8 @@ jobs:
         working-directory: ./frontend
         run: |
           yarn
-          yarn build
           yarn link @ttelements/shared
+          yarn build
           CI=true yarn test
       - name: Build Backend
         working-directory: ./backend
