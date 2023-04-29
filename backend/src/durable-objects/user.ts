@@ -107,7 +107,7 @@ export class User implements DurableObject {
           return status(400, { error: 'invalid username or password' });
         }
 
-        return onUserLoggedIn(this.env.ACCESS_TOKENS, userId, {
+        return onUserLoggedIn(this.env.ACCESS_TOKENS, {
           userId: userId,
           email: req.email,
           clientId: req.client_id,
@@ -198,8 +198,9 @@ export class User implements DurableObject {
             body: JSON.stringify(modifyCardsRequest)
           });
 
+          const pointsRemaining = points - requiredPoints;
           const result: PurchaseResponse = {
-            points: points - requiredPoints,
+            points: pointsRemaining,
             entries: cardsInPack.map((entry) => {
               const c = CardKinds.find((card) => card.id == entry.id && card.edition == entry.edition);
               if (!c) {
@@ -222,6 +223,9 @@ export class User implements DurableObject {
             })
           };
 
+          // set the users points remaining
+          await this.state.storage.put<number>(`points`, pointsRemaining);
+
           return status(201, result);
         } catch (err) {
           console.log(err);
@@ -236,7 +240,7 @@ export class User implements DurableObject {
 }
 
 const sendEmail = (recipient: string, subject: string, message: string) => {
-  return new Request('https://api.mailchannels.net/tx/v1/send', {
+  const email = new Request('https://api.mailchannels.net/tx/v1/send', {
     method: 'POST',
     headers: {
       'content-type': 'application/json'
@@ -260,6 +264,7 @@ const sendEmail = (recipient: string, subject: string, message: string) => {
       ]
     })
   });
+  return fetch(email);
 };
 
 const createDigest = async (password: string, salt: string) => {
@@ -295,7 +300,7 @@ const onUserSignedUp = async (store: DurableObjectStorage, tokenStore: KVNamespa
 
   store.put<string>(`password`, passwordHash);
 
-  return onUserLoggedIn(tokenStore, userId, {
+  return onUserLoggedIn(tokenStore, {
     userId: userId,
     email: req.email,
     clientId: req.client_id,
@@ -303,7 +308,7 @@ const onUserSignedUp = async (store: DurableObjectStorage, tokenStore: KVNamespa
   } as KVTokenData);
 };
 
-function onUserLoggedIn(tokenStore: KVNamespace<string>, userId: string, token: KVTokenData): Response | PromiseLike<Response> {
+function onUserLoggedIn(tokenStore: KVNamespace<string>, token: KVTokenData): Response | PromiseLike<Response> {
   const accessToken = crypto.randomUUID();
   const refreshToken = crypto.randomUUID();
 
