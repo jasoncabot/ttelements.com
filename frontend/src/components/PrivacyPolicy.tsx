@@ -1,7 +1,7 @@
 const PrivacyPolicy = () => {
   return (
     <div className="flex min-h-screen w-full flex-col p-4 md:p-12">
-      <h1 className="text-3xl font-bold tracking-tight">Card Collection</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Privacy Policy</h1>
       <div className="mt-8 rounded bg-gray-900 p-8">
         <p className="mb-4">
           This privacy policy sets out how ttelements.com uses and protects any
