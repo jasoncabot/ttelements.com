@@ -7,8 +7,7 @@ import {
   JoinRequest,
   OwnedCardResponse,
   PlayCardRequest,
-  PlayerResponse,
-  ViewableCardResponse,
+  ViewableCardResponse
 } from "@ttelements/shared";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -43,7 +42,7 @@ const ViewGame = () => {
     if (gameId) {
       fetchGame();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId]);
 
   const [socketToken, setSocketToken] = useState<string | null>(null);
@@ -65,7 +64,7 @@ const ViewGame = () => {
     if (gameId) {
       createSocketToken();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId]);
 
   const handleEventReceived = (event: GameEvent) => {
@@ -117,7 +116,7 @@ const ViewGame = () => {
       socket?.close();
       setSocket(null);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socketToken]);
 
   const sendCommand = (command: GameCommand) => {
@@ -238,33 +237,24 @@ const ViewGame = () => {
 };
 
 const WinningView: React.FC<{ game: GameResponse }> = ({ game }) => {
-  let winner: PlayerResponse | undefined;
+  let winner: string | undefined;
   if (game.you.score > game.opponent.score) {
-    winner = game.you;
+    winner = "You win! 🎉";
   } else if (game.you.score === game.opponent.score) {
-    winner = undefined;
+    winner = "It's a draw! 🤝";
   } else {
-    winner = game.opponent;
-  }
-
-  if (winner === undefined) {
-    return (
-      <div className="mt-16 flex flex-col items-center justify-center text-center">
-        <div className="mt-4 text-2xl font-bold text-white">
-          <h1>Game Over</h1>
-          <p>It was a draw!</p>
-        </div>
-        <Link to="/play" className="mt-4">
-          Play again
-        </Link>
-      </div>
-    );
+    winner = "You lost! 😢";
   }
 
   return (
-    <div>
-      <h1>Game Over</h1>
-      <p>{winner.name} won!</p>
+    <div className="mt-16 flex flex-col items-center justify-center text-center">
+      <div className="mt-4 text-2xl font-bold text-white">
+        <h1>Game Over</h1>
+        <p>{winner}</p>
+      </div>
+      <Link to="/play" className="mt-4">
+        Play again
+      </Link>
     </div>
   );
 };
@@ -292,7 +282,7 @@ const TradingView: React.FC<{
       }
     };
     fetchCards();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <CardSelectionView cards={cards} onCardsChosen={onCardsChosen} />;
@@ -321,7 +311,7 @@ const PickInProgressView: React.FC<{
       }
     };
     fetchCards();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <CardSelectionView cards={cards} onCardsChosen={onCardsChosen} />;

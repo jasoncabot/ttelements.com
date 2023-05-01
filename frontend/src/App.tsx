@@ -19,11 +19,12 @@ import Shop from "./components/Shop";
 import TermsAndConditions from "./components/TermsAndConditions";
 import ViewGame from "./components/game/ViewGame";
 import { AuthProvider, ProtectedRoute } from "./providers/AuthProvider";
+import SecuritySettings from "./components/Security";
 
 const App = () => {
   return (
     <AuthProvider>
-      <div className="bg-gray-900 bg-gradient-to-tr from-[#D97706] via-[#DB5250] to-[#B84A7B] text-white">
+      <div className="bg-gray-900 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#D97706] via-[#DB5250] to-[#B84A7B] text-white">
         <Navigation />
         <MessageBannerProvider>
           <div className="container mx-auto min-h-screen">
@@ -51,6 +52,7 @@ const App = () => {
                 element={<TermsAndConditions />}
               />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/settings/security" element={<SecuritySettings />} />
               <Route path="/settings" element={<AccountSettings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

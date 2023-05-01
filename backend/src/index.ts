@@ -18,6 +18,7 @@ import {
 } from './durable-objects/game';
 import { confirmSignupAction, createSignupAction, loginAction, purchaseAction, refreshTokenAction, userDetailsAction } from './durable-objects/user';
 import { RequestWithUser, requireUser, withUser } from './middleware';
+import { md5 } from './middleware/hash';
 
 const { preflight, corsify } = createCors({
   methods: ['GET', 'POST'],
@@ -214,8 +215,10 @@ router
       const id = env.GAME.idFromName('global');
       const obj = env.GAME.get(id);
 
+      const hashedEmail = await md5(request.user!.email.toLowerCase().trim());
+
       const created = (await obj
-        .fetch(createGameAction(request.user!.id, request.user!.name), {
+        .fetch(createGameAction(request.user!.id, request.user!.name, hashedEmail), {
           method: 'POST',
           body: createRequest
         })
@@ -244,7 +247,9 @@ router
     const id = env.GAME.idFromName(gameId);
     const obj = env.GAME.get(id);
 
-    const joinResponse = obj.fetch(joinGameAction(request.user!.id, request.user!.name), {
+    const hashedEmail = await md5(request.user!.email.toLowerCase().trim());
+
+    const joinResponse = obj.fetch(joinGameAction(request.user!.id, request.user!.name, hashedEmail), {
       method: 'POST',
       body: joinRequest
     });
@@ -296,9 +301,11 @@ router
     const gameId = (request.params || {}).id;
     // use web crypto to generate secure uuid
     const token = crypto.randomUUID();
+    const hashedEmail = await md5(request.user!.email.toLowerCase().trim());
     const socketToken: TokenEntry = {
       userId: request.user!.id,
       userName: request.user!.name,
+      emailHash: hashedEmail,
       gameId: gameId
     };
     await env.SOCKET_TOKENS.put(token, JSON.stringify(socketToken), { expirationTtl: 60 * 60 * 24 });

@@ -40,6 +40,7 @@ export type GameResponse = {
 export type PlayerResponse = {
   id: string;
   name: string;
+  emailHash: string;
   score: number;
   cards: CardResponse[];
 };

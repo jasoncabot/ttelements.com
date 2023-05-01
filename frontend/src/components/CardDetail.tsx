@@ -59,22 +59,22 @@ const CardDetail: React.FC<CardDetailProps> = ({
       <div className="absolute z-20 h-full w-full">{children}</div>
 
       <img
-        className="absolute z-10 ml-[18%] mt-[5%] h-[20%] w-[20%] md:ml-[11%] md:h-[10%] md:w-[10%]"
+        className="absolute z-10 ml-[18%] mt-[5%] h-[20%] w-[20%] opacity-70"
         src={numberImage(up)}
         alt={up.toString()}
       />
       <img
-        className="absolute z-10 ml-[5%] mt-[26%] h-[20%] w-[20%] md:mt-[16%] md:h-[10%] md:w-[10%]"
+        className="absolute z-10 ml-[5%] mt-[26%] h-[20%] w-[20%] opacity-70"
         src={numberImage(left)}
         alt={left.toString()}
       />
       <img
-        className="absolute z-10 ml-[27%] mt-[26%] h-[20%] w-[20%] md:ml-[17%] md:mt-[16%] md:h-[10%] md:w-[10%]"
+        className="absolute z-10 ml-[27%] mt-[26%] h-[20%] w-[20%] opacity-70"
         src={numberImage(right)}
         alt={right.toString()}
       />
       <img
-        className="absolute z-10 ml-[18%] mt-[47%] h-[20%] w-[20%] md:ml-[11%] md:mt-[27%] md:h-[10%] md:w-[10%]"
+        className="absolute z-10 ml-[18%] mt-[47%] h-[20%] w-[20%] opacity-70"
         src={numberImage(down)}
         alt={down.toString()}
       />

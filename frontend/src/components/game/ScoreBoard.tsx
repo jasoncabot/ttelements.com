@@ -1,13 +1,14 @@
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import { ChevronLeftIcon } from "@heroicons/react/20/solid";
 import { useEffect, useState } from "react";
 import { classNames } from "..";
-import { scoreImage } from "../../images/cards";
+import { CheckIcon, ChevronRightIcon, InformationCircleIcon } from "@heroicons/react/24/solid";
+import { LightBulbIcon } from "@heroicons/react/24/outline";
 
 const ScoreBoard: React.FC<{
   isMyTurn: boolean;
   endsAt: Date;
-  me: { name: string; score: number };
-  you: { name: string; score: number };
+  me: { name: string; score: number; emailHash: string };
+  you: { name: string; score: number; emailHash: string };
 }> = ({ isMyTurn, endsAt, me, you }) => {
   const [remainingTime, setRemainingTime] = useState("00:00");
   useEffect(() => {
@@ -15,8 +16,8 @@ const ScoreBoard: React.FC<{
     const interval = setInterval(() => {
       const now = new Date();
       const diff = Math.floor((end.getTime() - now.getTime()) / 1000);
-      const minutes = Math.floor(diff / 60);
-      const seconds = diff % 60;
+      const minutes = Math.max(0, Math.floor(diff / 60));
+      const seconds = Math.max(0, diff % 60);
       setRemainingTime(
         `${minutes.toString().padStart(2, "0")}:${seconds
           .toString()
@@ -27,44 +28,39 @@ const ScoreBoard: React.FC<{
   }, [remainingTime, endsAt]);
 
   return (
-    <div className="align-center flex flex-row items-center justify-center space-x-4 p-4">
-      <div
-        className={classNames(
-          { "font-bold": isMyTurn },
-          "flex flex-grow flex-row items-center text-xs"
-        )}
-      >
-        <ChevronRightIcon
+    <div className="align-center flex flex-row items-center justify-center space-x-4">
+      <div className="flex flex-row items-center text-gray-900">
+        <img
           className={classNames(
-            { "opacity-0": !isMyTurn },
-            "h-6 w-6 transition-opacity duration-500 ease-in-out"
+            "ml-1 mt-1 h-6 w-6 rounded-full md:my-2 md:h-12 md:w-12",
+            {
+              "opacity-60": !isMyTurn,
+              "border-grey-500 border": isMyTurn,
+            }
           )}
+          src={`https://www.gravatar.com/avatar/${me.emailHash}?d=retro`}
+          title={me.name}
+          alt={me.name}
         />
-        {me.name}
       </div>
-      <img
-        src={scoreImage(me.score)}
-        alt={me.score.toString()}
-        className="h-6 w-6 flex-shrink md:h-12 md:w-12"
-      />
-      <div className="font-mono text-xl">{remainingTime}</div>
-      <img
-        src={scoreImage(you.score)}
-        alt={me.score.toString()}
-        className="h-6 w-6 flex-shrink md:h-12 md:w-12"
-      />
-      <div
-        className={classNames(
-          { "font-bold": !isMyTurn },
-          "flex flex-grow flex-row items-center justify-end text-right text-xs"
-        )}
-      >
-        {you.name}
-        <ChevronLeftIcon
-          className={classNames(
-            { "opacity-0": isMyTurn },
-            "h-6 w-6 transition-opacity duration-500 ease-in-out"
-          )}
+      <div className="flex-grow text-right font-mono text-2xl font-bold">
+        {me.score.toString()}
+      </div>
+      <div className="text-s font-mono font-light tracking-tight">
+        {remainingTime}
+      </div>
+      <div className="flex-grow font-mono text-2xl font-bold">
+        {you.score.toString()}
+      </div>
+      <div className="mr-1 mt-1 h-6 w-6 rounded-full md:my-2 md:h-12 md:w-12">
+        <img
+          className={classNames("rounded-full", {
+            "opacity-60": isMyTurn,
+            "border-grey-500 border": !isMyTurn,
+          })}
+          src={`https://www.gravatar.com/avatar/${you.emailHash}?d=retro`}
+          title={you.name}
+          alt={you.name}
         />
       </div>
     </div>

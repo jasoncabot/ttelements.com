@@ -10,7 +10,6 @@ import {
   GameRule,
   GameState,
   GameTradeRule,
-  JoinRequest,
   JoinableGame,
   OwnedCardResponse,
   PlayCardRequest,
@@ -21,11 +20,11 @@ import {
 import { json, missing, status } from 'itty-router-extras';
 import { listOwnedCardsAction } from './card-collection';
 
-export const createGameAction = (userId: string, userName: string) => `${durableObjectGameAction('create')}&userId=${userId}&userName=${userName}`;
+export const createGameAction = (userId: string, userName: string, emailHash: string) => `${durableObjectGameAction('create')}&userId=${userId}&userName=${userName}&emailHash=${emailHash}`;
 export const showGameAction = (userId: string) => `${durableObjectGameAction('show')}&userId=${userId}`;
 export const listGameAction = (userId: string) => `${durableObjectGameAction('list')}&userId=${userId}`;
 export const listOpenGameAction = () => `${durableObjectGameAction('list-open')}`;
-export const joinGameAction = (userId: string, userName: string) => `${durableObjectGameAction('join')}&userId=${userId}&userName=${userName}`;
+export const joinGameAction = (userId: string, userName: string, emailHash: string) => `${durableObjectGameAction('join')}&userId=${userId}&userName=${userName}&emailHash=${emailHash}`;
 export const playCardInGameAction = (userId: string) => `${durableObjectGameAction('play-card')}&userId=${userId}`;
 export const chooseCardsInGameAction = (userId: string) => `${durableObjectGameAction('choose-cards')}&userId=${userId}`;
 export const tradeCardsInGameAction = (userId: string) => `${durableObjectGameAction('trade-cards')}&userId=${userId}`;
@@ -75,6 +74,7 @@ interface SpaceEntry {
 interface PlayerEntry {
   id: string;
   name: string;
+  emailHash: string;
   score: number;
   cards: CardEntry[];
 }
@@ -95,12 +95,14 @@ export interface Connection {
   quitting: boolean;
   userId: string;
   userName: string;
+  emailHash: string;
 }
 
 export interface TokenEntry {
   userId: string;
   gameId: string;
   userName: string;
+  emailHash: string;
 }
 
 type SocketToken = string;
@@ -123,10 +125,11 @@ export class Game implements DurableObject {
       case 'create': {
         const userId = searchParams.get('userId')!;
         const userName = searchParams.get('userName')!;
+        const emailHash = searchParams.get('emailHash')!;
         const req = (await request.json()) as CreateRequest;
 
         try {
-          const game = await handleCreate(this.state, this.env, this.connections.values(), req, userId, userName);
+          const game = await handleCreate(this.state, this.env, this.connections.values(), req, userId, userName, emailHash);
           return status(201, playerView(game, userId));
         } catch (e: any) {
           return status(400, { error: e.message });
@@ -162,10 +165,10 @@ export class Game implements DurableObject {
       case 'join': {
         const userId = searchParams.get('userId')!;
         const userName = searchParams.get('userName')!;
-        const req = (await request.json()) as JoinRequest;
+        const emailHash = searchParams.get('emailHash')!;
 
         try {
-          const result = await handleJoin(this.state, this.env, this.connections.values(), req, userId, userName);
+          const result = await handleJoin(this.state, this.env, this.connections.values(), userId, userName, emailHash);
           return json(result);
         } catch (e: any) {
           return status(400, { error: e.message });
@@ -254,7 +257,7 @@ export class Game implements DurableObject {
 
         const [client, server] = Object.values(new WebSocketPair());
 
-        await this.handleSession(server, token, socketToken.userId, socketToken.userName);
+        await this.handleSession(server, token, socketToken.userId, socketToken.userName, socketToken.emailHash);
 
         // consume this token so it can't be re-used
         this.env.SOCKET_TOKENS.delete(token);
@@ -272,14 +275,15 @@ export class Game implements DurableObject {
     }
   }
 
-  handleSession(socket: WebSocket, token: string, userId: string, userName: string) {
+  handleSession(socket: WebSocket, token: string, userId: string, userName: string, emailHash: string) {
     socket.accept();
 
     const connection = {
       socket,
       quitting: false,
       userId: userId,
-      userName: userName
+      userName: userName,
+      emailHash: emailHash
     } as Connection;
     this.connections.set(token, connection);
 
@@ -295,7 +299,7 @@ export class Game implements DurableObject {
             await handlePlayCard(this.state, this.env, this.connections.values(), command.data as PlayCardRequest, userId);
             break;
           case 'join':
-            await handleJoin(this.state, this.env, this.connections.values(), command.data as JoinRequest, userId, userName);
+            await handleJoin(this.state, this.env, this.connections.values(), userId, userName, emailHash);
             break;
           case 'trade-cards':
             await handleTradeCards(this.state, this.env, this.connections.values(), command.data as TradeCardsRequest, userId);
@@ -398,12 +402,14 @@ const playerView = (game: GameEntry, userId: string) => {
     you: {
       id: you?.id,
       name: you?.name,
+      emailHash: you?.emailHash,
       score: you?.score,
       cards: yourCards
     },
     opponent: {
       id: opponent?.id,
       name: opponent?.name,
+      emailHash: opponent?.emailHash,
       score: opponent?.score,
       cards: opponentCards
     },
@@ -456,6 +462,10 @@ const handlePlayCard = async (state: DurableObjectState, env: Bindings, connecti
   const myTurn = game.players[game.turn].id === userId;
   if (!myTurn) {
     throw new Error('Not your turn');
+  }
+
+  if (game.board[req.space].card) {
+    throw new Error('Space already occupied');
   }
 
   const card = game.players[game.turn].cards[req.cardIndex];
@@ -558,9 +568,9 @@ const handleJoin = async (
   state: DurableObjectState,
   env: Bindings,
   connections: IterableIterator<Connection>,
-  request: JoinRequest,
   userId: string,
-  userName: string
+  userName: string,
+  emailHash: string,
 ) => {
   const game = await state.storage.get<GameEntry>('entry');
 
@@ -595,6 +605,7 @@ const handleJoin = async (
   game.players.push({
     id: userId,
     name: userName,
+    emailHash: emailHash,
     score: 5,
     cards
   });
@@ -624,7 +635,8 @@ const handleCreate = async (
   connections: IterableIterator<Connection>,
   request: CreateRequest,
   userId: string,
-  userName: string
+  userName: string,
+  emailHash: string,
 ) => {
   const isValid = true;
   // TODO: validate request.rules and request.tradeRule
@@ -661,7 +673,7 @@ const handleCreate = async (
 
   const game: GameEntry = {
     id: gameId,
-    players: [{ id: userId, name: userName, score: 5, cards }],
+    players: [{ id: userId, name: userName, emailHash: emailHash, score: 5, cards }],
     rules: request.rules,
     tradeRule: request.tradeRule,
     state: 'WaitingForOpponent',

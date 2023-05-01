@@ -15,7 +15,7 @@ const CardRevealer: React.FC<CardRevealerProps> = ({ cards }) => {
             front={
               <img
                 alt={`Reveal card ${index + 1}`}
-                className="h-full w-full select-none"
+                className="m-1 h-full w-full select-none overflow-hidden rounded-md border border-gray-800 shadow-md"
                 src={cardBack}
               />
             }
