@@ -63,7 +63,7 @@ const GameOptions = () => {
     {
       key: "same",
       title: "Same",
-      toggle: useState(true),
+      toggle: useState(false),
       description: {
         on: "Cards are flipped if numbers on at least two sides of the placed card match those it touches",
         off: "Same rule is not active",
@@ -72,7 +72,7 @@ const GameOptions = () => {
     {
       key: "plus",
       title: "Plus",
-      toggle: useState(true),
+      toggle: useState(false),
       description: {
         on: "Cards are flipped if touching numbers sum to the same value on at least two sides of placed card",
         off: "Plus rule is not active",
@@ -81,7 +81,7 @@ const GameOptions = () => {
     {
       key: "samewall",
       title: "Same Wall",
-      toggle: useState(true),
+      toggle: useState(false),
       description: {
         on: "Same Wall",
         off: "Same Wall rule is not active",
@@ -90,7 +90,7 @@ const GameOptions = () => {
     {
       key: "pluswall",
       title: "Plus Wall",
-      toggle: useState(true),
+      toggle: useState(false),
       description: {
         on: "Plus Wall",
         off: "Plus Wall rule is not active",
@@ -99,7 +99,7 @@ const GameOptions = () => {
     {
       key: "combo",
       title: "Combo",
-      toggle: useState(true),
+      toggle: useState(false),
       description: {
         on: "Cards flipped by same or plus may flip more cards if they have a higher number on touching side",
         off: "Flipped cards do not trigger flips of other cards",
@@ -108,7 +108,7 @@ const GameOptions = () => {
     {
       key: "elemental",
       title: "Elemental",
-      toggle: useState(true),
+      toggle: useState(false),
       description: {
         on: "Board contains random elements that increase or decrease card values",
         off: "There are no elements on the board",
@@ -180,8 +180,7 @@ const GameOptions = () => {
     }
   };
 
-  const handleJoinGame = async (e: SyntheticEvent, id: string) => {
-    e.preventDefault();
+  const handleJoinGame = async (id: string) => {
     try {
       const response = await fetchData<GameResponse>(
         "POST",

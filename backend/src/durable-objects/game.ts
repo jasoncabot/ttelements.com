@@ -20,11 +20,13 @@ import {
 import { json, missing, status } from 'itty-router-extras';
 import { listOwnedCardsAction } from './card-collection';
 
-export const createGameAction = (userId: string, userName: string, emailHash: string) => `${durableObjectGameAction('create')}&userId=${userId}&userName=${userName}&emailHash=${emailHash}`;
+export const createGameAction = (userId: string, userName: string, emailHash: string) =>
+  `${durableObjectGameAction('create')}&userId=${userId}&userName=${userName}&emailHash=${emailHash}`;
 export const showGameAction = (userId: string) => `${durableObjectGameAction('show')}&userId=${userId}`;
 export const listGameAction = (userId: string) => `${durableObjectGameAction('list')}&userId=${userId}`;
 export const listOpenGameAction = () => `${durableObjectGameAction('list-open')}`;
-export const joinGameAction = (userId: string, userName: string, emailHash: string) => `${durableObjectGameAction('join')}&userId=${userId}&userName=${userName}&emailHash=${emailHash}`;
+export const joinGameAction = (userId: string, userName: string, emailHash: string) =>
+  `${durableObjectGameAction('join')}&userId=${userId}&userName=${userName}&emailHash=${emailHash}`;
 export const playCardInGameAction = (userId: string) => `${durableObjectGameAction('play-card')}&userId=${userId}`;
 export const chooseCardsInGameAction = (userId: string) => `${durableObjectGameAction('choose-cards')}&userId=${userId}`;
 export const tradeCardsInGameAction = (userId: string) => `${durableObjectGameAction('trade-cards')}&userId=${userId}`;
@@ -388,11 +390,15 @@ const playerView = (game: GameEntry, userId: string) => {
     } as SpaceResponse;
   };
 
+  // if the game is open then you can see your opponent's cards
+  // otherwise you can only see the back of their cards
+  const canSeeOpponentsCards = game.rules.includes('open');
+
   const yourCards: CardResponse[] = you?.cards.map((card) => toCardResponse(card, false)) || [];
   for (let i = yourCards.length; i < 5; i++) {
     yourCards.push(toCardResponse({} as CardEntry, true));
   }
-  const opponentCards: CardResponse[] = opponent?.cards.map((card) => toCardResponse(card, true)) || [];
+  const opponentCards: CardResponse[] = opponent?.cards.map((card) => toCardResponse(card, !canSeeOpponentsCards)) || [];
   for (let i = opponentCards.length; i < 5; i++) {
     opponentCards.push(toCardResponse({} as CardEntry, true));
   }
@@ -570,7 +576,7 @@ const handleJoin = async (
   connections: IterableIterator<Connection>,
   userId: string,
   userName: string,
-  emailHash: string,
+  emailHash: string
 ) => {
   const game = await state.storage.get<GameEntry>('entry');
 
@@ -636,7 +642,7 @@ const handleCreate = async (
   request: CreateRequest,
   userId: string,
   userName: string,
-  emailHash: string,
+  emailHash: string
 ) => {
   const isValid = true;
   // TODO: validate request.rules and request.tradeRule
@@ -684,7 +690,7 @@ const handleCreate = async (
 
   const joinableGame = {
     id: gameId,
-    creator: userName,
+    creator: emailHash,
     createdAt: new Date().toISOString(),
     rules: request.rules,
     tradeRule: request.tradeRule

@@ -1,8 +1,5 @@
-import { ChevronLeftIcon } from "@heroicons/react/20/solid";
 import { useEffect, useState } from "react";
 import { classNames } from "..";
-import { CheckIcon, ChevronRightIcon, InformationCircleIcon } from "@heroicons/react/24/solid";
-import { LightBulbIcon } from "@heroicons/react/24/outline";
 
 const ScoreBoard: React.FC<{
   isMyTurn: boolean;
@@ -44,20 +41,23 @@ const ScoreBoard: React.FC<{
         />
       </div>
       <div className="flex-grow text-right font-mono text-2xl font-bold">
-        {me.score.toString()}
+        {me.score?.toString() || "5"}
       </div>
       <div className="text-s font-mono font-light tracking-tight">
         {remainingTime}
       </div>
       <div className="flex-grow font-mono text-2xl font-bold">
-        {you.score.toString()}
+        {you.score?.toString() || "5"}
       </div>
-      <div className="mr-1 mt-1 h-6 w-6 rounded-full md:my-2 md:h-12 md:w-12">
+      <div className="flex flex-row items-center text-gray-900">
         <img
-          className={classNames("rounded-full", {
-            "opacity-60": isMyTurn,
-            "border-grey-500 border": !isMyTurn,
-          })}
+          className={classNames(
+            "mr-1 mt-1 h-6 w-6 rounded-full md:my-2 md:mr-0 md:h-12 md:w-12",
+            {
+              "opacity-60": isMyTurn,
+              "border-grey-500 border": !isMyTurn,
+            }
+          )}
           src={`https://www.gravatar.com/avatar/${you.emailHash}?d=retro`}
           title={you.name}
           alt={you.name}

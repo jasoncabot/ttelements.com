@@ -1,7 +1,9 @@
 import { JoinableGame } from "@ttelements/shared";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../providers/AuthProvider";
 import { AuthStatus } from "../services/AuthService";
+import JoinableGameCard from "./JoinableGameCard";
 import { useMessageBanner } from "./MessageBanner";
 
 type NewsItem = {
@@ -32,7 +34,7 @@ const Home: React.FC = () => {
       }
     };
     loadNews();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -50,42 +52,30 @@ const Home: React.FC = () => {
       }
     };
     loadGames();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const navigate = useNavigate();
+  const handleJoinGame = (id: string) => {
+    navigate(`/games/${id}`);
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col p-4 md:p-12">
       <h1 className="text-3xl font-bold tracking-tight">Games</h1>
       <div className="my-8 rounded bg-gray-900 p-8">
         <div className="grid grid-cols-1 gap-4 rounded p-3 sm:grid-cols-2 lg:grid-cols-3">
-          {games.map(({ id, createdAt, creator }) => (
-            <div
+          {games.map(({ id, createdAt, creator, rules, tradeRule }, index) => (
+            <JoinableGameCard
               key={id}
-              className="overflow-hidden rounded-lg bg-white shadow-lg"
-            >
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {creator}
-                </h3>
-                <p className="mt-2 text-gray-600">{createdAt}</p>
-              </div>
-              <div className="flex items-center justify-between border-t border-gray-200 p-4">
-                <div className="flex items-center">
-                  <div className="text-sm">
-                    <p className="font-medium text-gray-900">Game ID</p>
-                    <p className="text-gray-500">{id}</p>
-                  </div>
-                </div>
-                <div className="flex-shrink-0">
-                  <a
-                    href={`/games/${id}`}
-                    className="rounded bg-amber-500 px-4 py-2 font-bold text-white hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
-                  >
-                    Join Game
-                  </a>
-                </div>
-              </div>
-            </div>
+              id={id}
+              createdAt={createdAt}
+              creator={creator}
+              index={index}
+              onGameJoined={handleJoinGame}
+              rules={rules}
+              tradeRule={tradeRule}
+            />
           ))}
         </div>
       </div>

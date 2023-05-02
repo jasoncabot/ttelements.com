@@ -161,7 +161,7 @@ export class User implements DurableObject {
           }
 
           const requiredPoints = {
-            basic: 100,
+            basic: 0,//100,
             premium: 500,
             ultimate: 1000
           }[req.kind];

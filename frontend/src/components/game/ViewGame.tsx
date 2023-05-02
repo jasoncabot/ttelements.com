@@ -7,12 +7,13 @@ import {
   JoinRequest,
   OwnedCardResponse,
   PlayCardRequest,
-  ViewableCardResponse
+  ViewableCardResponse,
 } from "@ttelements/shared";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../providers/AuthProvider";
 import { AuthStatus } from "../../services/AuthService";
+import JoinableGameCard from "../JoinableGameCard";
 import Loading from "../Loading";
 import { useMessageBanner } from "../MessageBanner";
 import GameDetails from "./GameDetails";
@@ -219,7 +220,23 @@ const ViewGame = () => {
       if (game.you.id) {
         return <WaitingForOpponentView gameId={game.id} />;
       } else {
-        return <JoinGameCard game={game} onGameJoined={handleJoinGame} />;
+        return (
+          <div className="p-8">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Join this game?
+            </h1>
+            <div className="mt-8">
+              <JoinableGameCard
+                id={game.id}
+                index={0}
+                creator={game.opponent.emailHash}
+                rules={game.rules}
+                tradeRule={game.tradeRule}
+                onGameJoined={handleJoinGame}
+              />
+            </div>
+          </div>
+        );
       }
     case "PickInProgress":
       return <PickInProgressView onCardsChosen={handleChooseCards} />;
@@ -315,40 +332,6 @@ const PickInProgressView: React.FC<{
   }, []);
 
   return <CardSelectionView cards={cards} onCardsChosen={onCardsChosen} />;
-};
-
-const JoinGameCard: React.FC<{
-  game: GameResponse;
-  onGameJoined: (id: string) => void;
-}> = ({ game, onGameJoined }) => {
-  return (
-    <div className="overflow-hidden rounded-lg bg-white shadow-lg">
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900">{game.id}</h3>
-        <p className="mt-2 text-gray-600">{game.id}</p>
-      </div>
-      <div className="flex items-center justify-between border-t border-gray-200 p-4">
-        <div className="flex items-center">
-          <div className="text-sm">
-            <p className="font-medium text-gray-900">Game ID</p>
-            <p className="text-gray-500">{game.id}</p>
-          </div>
-        </div>
-        <div className="flex-shrink-0">
-          <a
-            href={`/games/${game.id}`}
-            onClick={(e) => {
-              e.preventDefault();
-              onGameJoined(game.id);
-            }}
-            className="rounded bg-amber-500 px-4 py-2 font-bold text-white hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
-          >
-            Join Game
-          </a>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 const WaitingForOpponentView: React.FC<{
@@ -449,7 +432,7 @@ const CardSelectionView: React.FC<{
             }`}
             onClick={() => handleCardClick(i)}
           >
-            OMG my card is {card.name}
+            {card.name}
           </div>
         ))}
       </div>
