@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
+    "lib": ["esnext"],
+    "target": "esnext",
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,

@@ -1,22 +1,19 @@
-import {
+export type {
   LoginRequest,
   LoginResponse,
   RefreshTokenRequest,
   RefreshTokenResponse,
 } from "./auth";
-import {
-  CardEdition,
-  CardElement,
-  CardKindDefinition,
-  CardKinds,
-} from "./cards";
-import {
+export { CardKinds } from "./cards";
+export type { CardEdition, CardElement, CardKindDefinition } from "./cards";
+export type {
   ListOwnedCardsRequest,
   OwnedCardResponse,
   UpdateCardCollectionRequest,
   UpdateCardCollectionResponse,
 } from "./collection";
-import {
+export { processFlips } from "./flips";
+export type {
   CardPlayedEvent,
   CardResponse,
   ChooseCardsRequest,
@@ -35,47 +32,10 @@ import {
   TradeCardsRequest,
   ViewableCardResponse,
 } from "./games";
-import {
+export type {
   ConfirmUserSignupRequest,
   UserSignupRequest,
   UserSignupResponse,
 } from "./register";
-import { PurchaseRequest, PurchaseResponse } from "./shop";
-import { UserDetailsRequest, UserDetailsResponse } from "./user";
-
-export { CardKinds };
-export type {
-  CardPlayedEvent,
-  CardResponse,
-  ChooseCardsRequest,
-  CreateRequest,
-  GameCommand,
-  GameEvent,
-  GameResponse,
-  GameRule,
-  GameState,
-  GameTradeRule,
-  JoinableGame,
-  JoinRequest,
-  PlayCardRequest,
-  PlayerResponse,
-  SpaceResponse,
-  TradeCardsRequest,
-  ViewableCardResponse,
-};
-export type { CardEdition, CardElement, CardKindDefinition };
-export type {
-  LoginRequest,
-  LoginResponse,
-  RefreshTokenRequest,
-  RefreshTokenResponse,
-};
-export type { ConfirmUserSignupRequest, UserSignupRequest, UserSignupResponse };
-export type {
-  ListOwnedCardsRequest,
-  OwnedCardResponse,
-  UpdateCardCollectionRequest,
-  UpdateCardCollectionResponse,
-};
-export type { UserDetailsRequest, UserDetailsResponse };
-export type { PurchaseRequest, PurchaseResponse };
+export type { PurchaseRequest, PurchaseResponse } from "./shop";
+export type { UserDetailsRequest, UserDetailsResponse } from "./user";

@@ -59,6 +59,7 @@ export type ViewableCardResponse = {
 export type CardResponse = {
   hidden: boolean;
   card?: ViewableCardResponse;
+  chosen: boolean;
 };
 
 export type SpaceResponse = {

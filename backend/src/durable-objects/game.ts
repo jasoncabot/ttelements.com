@@ -15,10 +15,12 @@ import {
   PlayCardRequest,
   SpaceResponse,
   TradeCardsRequest,
-  ViewableCardResponse
+  ViewableCardResponse,
+  processFlips
 } from '@ttelements/shared';
 import { json, missing, status } from 'itty-router-extras';
 import { listOwnedCardsAction } from './card-collection';
+import { GameUpdateResponse } from '../../../shared/src/flips';
 
 export const createGameAction = (userId: string, userName: string, emailHash: string) =>
   `${durableObjectGameAction('create')}&userId=${userId}&userName=${userName}&emailHash=${emailHash}`;
@@ -79,6 +81,7 @@ interface PlayerEntry {
   emailHash: string;
   score: number;
   cards: CardEntry[];
+  playedIndexes: number[];
 }
 
 interface GameEntry {
@@ -353,16 +356,18 @@ const playerView = (game: GameEntry, userId: string) => {
   const you = youIndex > -1 ? game.players[youIndex] : undefined;
   const opponent = opponentIndex > -1 ? game.players[opponentIndex] : undefined;
 
-  const toCardResponse = (card: CardEntry, hidden: boolean) => {
+  const toCardResponse = (card: CardEntry, hidden: boolean, chosen: boolean) => {
     if (hidden) {
       return {
-        hidden: true
-      };
+        hidden: true,
+        chosen: chosen
+      } as CardResponse;
     }
 
     return {
       hidden: false,
-      card: toViewableCard(card)
+      card: toViewableCard(card),
+      chosen: chosen
     } as CardResponse;
   };
 
@@ -392,15 +397,19 @@ const playerView = (game: GameEntry, userId: string) => {
 
   // if the game is open then you can see your opponent's cards
   // otherwise you can only see the back of their cards
-  const canSeeOpponentsCards = game.rules.includes('open');
+  // but only if both players have chosen their cards
+  const canSeeOpponentsCards = game.rules.includes('open') && ['InProgress', 'Trading', 'Completed'].includes(game.state);
 
-  const yourCards: CardResponse[] = you?.cards.map((card) => toCardResponse(card, false)) || [];
+  const youPlayedCards = you?.playedIndexes || [];
+  const yourCards: CardResponse[] = you?.cards.map((card, index) => toCardResponse(card, youPlayedCards.includes(index), true)) || [];
   for (let i = yourCards.length; i < 5; i++) {
-    yourCards.push(toCardResponse({} as CardEntry, true));
+    yourCards.push(toCardResponse({} as CardEntry, true, false));
   }
-  const opponentCards: CardResponse[] = opponent?.cards.map((card) => toCardResponse(card, !canSeeOpponentsCards)) || [];
+  const hidden = !canSeeOpponentsCards;
+  const opponentPlayedCards = opponent?.playedIndexes || [];
+  const opponentCards: CardResponse[] = opponent?.cards.map((card, index) => toCardResponse(card, opponentPlayedCards.includes(index) || hidden, true)) || [];
   for (let i = opponentCards.length; i < 5; i++) {
-    opponentCards.push(toCardResponse({} as CardEntry, true));
+    opponentCards.push(toCardResponse({} as CardEntry, true, false));
   }
   return {
     id: game.id,
@@ -438,7 +447,7 @@ const onGameStateChange = (game: GameEntry, connections: IterableIterator<Connec
   }
 };
 
-const onCardPlayed = (game: GameEntry, space: number, connections: IterableIterator<Connection>) => {
+const onCardPlayed = (game: GameEntry, flipResponse: GameUpdateResponse, connections: IterableIterator<Connection>) => {
   for (const connection of connections) {
     // // TODO: set this properly
     // const data: CardPlayedEvent = {
@@ -465,7 +474,8 @@ const handlePlayCard = async (state: DurableObjectState, env: Bindings, connecti
     throw new Error('Not in game');
   }
 
-  const myTurn = game.players[game.turn].id === userId;
+  const player = game.players[game.turn];
+  const myTurn = player.id === userId;
   if (!myTurn) {
     throw new Error('Not your turn');
   }
@@ -474,17 +484,32 @@ const handlePlayCard = async (state: DurableObjectState, env: Bindings, connecti
     throw new Error('Space already occupied');
   }
 
-  const card = game.players[game.turn].cards[req.cardIndex];
-  if (!card) {
+  const card = player.cards[req.cardIndex];
+  // if there's no card, or the player has already played it, then it's invalid
+  if (!card || player.playedIndexes.includes(req.cardIndex)) {
     throw new Error('Invalid card');
   }
-  game.players[game.turn].cards.splice(req.cardIndex, 1);
+  player.playedIndexes.push(req.cardIndex);
 
   game.board[req.space] = {
     card: card,
     playerId: userId,
     element: game.board[req.space].element
   };
+
+  const flipResponse = processFlips(playerView(game, userId), req.space);
+  flipResponse.forEach((changes, _) => {
+    changes.forEach((change, space) => {
+      if (change.type === 'flip') {
+        player.score++;
+        const opponent = game.players[(game.turn + 1) % game.players.length];
+        opponent.score--;
+
+        game.board[space].playerId = player.id;
+      }
+    });
+  });
+
   game.turn = (game.turn + 1) % game.players.length;
   game.turnEndsAt = new Date();
   game.turnEndsAt.setMinutes(game.turnEndsAt.getMinutes() + 5);
@@ -505,7 +530,7 @@ const handlePlayCard = async (state: DurableObjectState, env: Bindings, connecti
     obj.fetch(listEndGameAction(game.id, game.players[0].id, game.players[1].id), { method: 'POST' });
   }
 
-  onCardPlayed(game, req.space, connections);
+  onCardPlayed(game, flipResponse, connections);
 
   return playerView(game, userId);
 };
@@ -613,7 +638,8 @@ const handleJoin = async (
     name: userName,
     emailHash: emailHash,
     score: 5,
-    cards
+    cards,
+    playedIndexes: []
   });
 
   game.turn = (game.turn + 1) % game.players.length;
@@ -679,7 +705,7 @@ const handleCreate = async (
 
   const game: GameEntry = {
     id: gameId,
-    players: [{ id: userId, name: userName, emailHash: emailHash, score: 5, cards }],
+    players: [{ id: userId, name: userName, emailHash: emailHash, score: 5, cards, playedIndexes: [] }],
     rules: request.rules,
     tradeRule: request.tradeRule,
     state: 'WaitingForOpponent',

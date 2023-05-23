@@ -154,7 +154,8 @@ const findCardById: (id: number, edition: CardEdition) => CardEntry | undefined 
       down: found.down,
       left: found.left,
       right: found.right,
-      element: found.element
+      element: found.element,
+      played: false
     } as CardEntry;
   }
   return undefined;

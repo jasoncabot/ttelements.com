@@ -27,3 +27,4 @@ yarn-error.log*
 backend/dist
 frontend/dist
 shared/dist
+shared/coverage

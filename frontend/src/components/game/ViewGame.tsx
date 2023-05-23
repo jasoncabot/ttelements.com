@@ -5,18 +5,20 @@ import {
   GameEvent,
   GameResponse,
   JoinRequest,
-  OwnedCardResponse,
   PlayCardRequest,
-  ViewableCardResponse,
 } from "@ttelements/shared";
-import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../../providers/AuthProvider";
 import { AuthStatus } from "../../services/AuthService";
 import JoinableGameCard from "../JoinableGameCard";
 import Loading from "../Loading";
 import { useMessageBanner } from "../MessageBanner";
 import GameDetails from "./GameDetails";
+import PickInProgressView from "./PickInProgressView";
+import TradingView from "./TradingView";
+import WaitingForOpponentView from "./WaitingForOpponentView";
+import WinningView from "./WinningView";
 
 const ViewGame = () => {
   const [game, setGame] = useState<GameResponse | null>(null);
@@ -241,210 +243,36 @@ const ViewGame = () => {
     case "PickInProgress":
       return <PickInProgressView onCardsChosen={handleChooseCards} />;
     case "WaitingForOtherPlayer":
-      return (
-        <Loading message="Waiting for other player to choose their cards" />
-      );
+      // if we have chosen our cards, then show a loading screen
+      // otherwise display the pick in progress view again
+      const youHaveSelectedYourCards =
+        game.you.cards.filter((c) => c.chosen).length === 5;
+      if (youHaveSelectedYourCards) {
+        return (
+          <Loading message="Waiting for other player to choose their cards" />
+        );
+      } else {
+        return <PickInProgressView onCardsChosen={handleChooseCards} />;
+      }
     case "InProgress":
       return <GameDetails game={game} onPlayCard={handlePlayCard} />;
     case "Trading":
       return <TradingView gameId={game.id} onCardsChosen={handleTradeCards} />;
     case "Completed":
-      return <WinningView game={game} />;
-  }
-};
-
-const WinningView: React.FC<{ game: GameResponse }> = ({ game }) => {
-  let winner: string | undefined;
-  if (game.you.score > game.opponent.score) {
-    winner = "You win! 🎉";
-  } else if (game.you.score === game.opponent.score) {
-    winner = "It's a draw! 🤝";
-  } else {
-    winner = "You lost! 😢";
-  }
-
-  return (
-    <div className="mt-16 flex flex-col items-center justify-center text-center">
-      <div className="mt-4 text-2xl font-bold text-white">
-        <h1>Game Over</h1>
-        <p>{winner}</p>
-      </div>
-      <Link to="/play" className="mt-4">
-        Play again
-      </Link>
-    </div>
-  );
-};
-
-const TradingView: React.FC<{
-  gameId: string;
-  onCardsChosen: (selection: ChooseCardsRequest) => void;
-}> = ({ gameId, onCardsChosen }) => {
-  const { fetchData } = useAuth();
-  const { showMessage } = useMessageBanner();
-  const [cards, setCards] = useState<ViewableCardResponse[]>([]);
-
-  useEffect(() => {
-    const fetchCards = async () => {
-      try {
-        const response = await fetchData<OwnedCardResponse>(
-          "GET",
-          `/games/${gameId}/trades`,
-          null,
-          AuthStatus.REQUIRED
-        );
-        setCards(response.entries.map((c) => c.card));
-      } catch (e: any) {
-        showMessage(e.message);
-      }
-    };
-    fetchCards();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return <CardSelectionView cards={cards} onCardsChosen={onCardsChosen} />;
-};
-
-const PickInProgressView: React.FC<{
-  onCardsChosen: (selection: ChooseCardsRequest) => void;
-}> = ({ onCardsChosen }) => {
-  const { fetchData } = useAuth();
-  const { showMessage } = useMessageBanner();
-  const [cards, setCards] = useState<ViewableCardResponse[]>([]);
-
-  // fetch the current users cards from /cards
-  useEffect(() => {
-    const fetchCards = async () => {
-      try {
-        const response = await fetchData<OwnedCardResponse>(
-          "GET",
-          "/cards",
-          null,
-          AuthStatus.REQUIRED
-        );
-        setCards(response.entries.map((c) => c.card));
-      } catch (e: any) {
-        showMessage(e.message);
-      }
-    };
-    fetchCards();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return <CardSelectionView cards={cards} onCardsChosen={onCardsChosen} />;
-};
-
-const WaitingForOpponentView: React.FC<{
-  gameId: string;
-}> = ({ gameId }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.value = document.location.toString();
-    }
-  });
-
-  return (
-    <div className="flex flex-col items-center">
-      <div className="mt-16 rounded bg-gray-900 p-8 shadow-md md:w-1/2">
-        <h1 className="text-2xl font-bold tracking-tight">
-          Waiting for opponent
-        </h1>
-        <h2 className="text-l text-gray-400 ">
-          Share this link with your opponent
-        </h2>
-        <div className="mt-8">
-          <input
-            ref={inputRef}
-            type="text"
-            autoFocus={true}
-            className="title-font w-full rounded p-4 text-center text-sm font-medium text-gray-900"
-          />
-          <button
-            type="button"
-            className="mt-4 w-full rounded bg-amber-500 px-4 py-2 font-bold text-white hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
-            onClick={async (e) => {
-              const field = inputRef.current;
-              if (!field) return;
-
-              field.select();
-              field.setSelectionRange(0, 99999);
-
-              // check if we can use the clipboard
-              if (!navigator.clipboard) {
-                return;
-              }
-              await navigator.clipboard.writeText(field.value);
-            }}
-          >
-            Copy
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const CardSelectionView: React.FC<{
-  cards: ViewableCardResponse[];
-  onCardsChosen: (selection: ChooseCardsRequest) => void;
-}> = ({ cards, onCardsChosen }) => {
-  const [selection, setSelection] = useState<number[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { showMessage } = useMessageBanner();
-
-  const handleCardClick = (cardIndex: number) => {
-    if (selection.includes(cardIndex)) {
-      setSelection(selection.filter((i) => i !== cardIndex));
-    } else {
-      setSelection([...selection, cardIndex]);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (selection.length !== 5) {
-      showMessage("You must select 5 cards");
-      return;
-    }
-
-    setIsSubmitting(true);
-    const x: ChooseCardsRequest = {
-      cards: selection.map((i) => {
-        return {
-          kind: cards[i].kind,
-          edition: cards[i].edition,
-        };
-      }),
-    };
-    await onCardsChosen(x);
-    setIsSubmitting(false);
-  };
-
-  return (
-    <div>
-      <div className="flex flex-wrap">
-        {cards.map((card, i) => (
-          <div
-            key={i}
-            className={`w-1/4 p-2 ${
-              selection.includes(i) ? "bg-blue-200" : ""
-            }`}
-            onClick={() => handleCardClick(i)}
-          >
-            {card.name}
+      return (
+        <div>
+          <GameDetails game={game} onPlayCard={() => {}} />
+          <div className="overflow-none absolute left-0 top-0 z-10 h-full h-full w-full w-full bg-white/30 backdrop-blur-sm"></div>
+          <div className="align-center absolute left-0 top-0 z-20 flex h-full w-full items-center justify-center">
+            <div className="rounded-lg bg-gray-900 shadow-lg">
+              <div className="m-2 rounded bg-gray-800 px-24 pb-4">
+                <WinningView game={game} />
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
-      <button
-        className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-      >
-        Submit
-      </button>
-    </div>
-  );
+        </div>
+      );
+  }
 };
 
 export default ViewGame;
