@@ -1,0 +1,138 @@
+<svg width="600" height="600" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#0d1b2a" />
+      <stop offset="100%" stop-color="#06101a" />
+    </radialGradient>
+    <style>
+      .gold { fill: #f6d06b; }
+      .star { fill: #f6d06b; }
+      .dot { fill: #f6d06b; r: 1.5; }
+      .sparkle { fill: #f6d06b; r: 1; } /* Smaller dots for background */
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="600" height="600" fill="url(#bg)" rx="40" ry="40"/>
+
+  <!-- Decorative Border -->
+  <rect x="0" y="0" width="600" height="600" rx="30" ry="30" stroke="#f6d06b" stroke-width="4" fill="none"/>
+
+  <!-- Filigree Corners -->
+  <g stroke="#f6d06b" stroke-width="3" fill="none">
+    <path d="M50 50 Q90 50 90 90 Q90 110 70 110 Q60 100 60 90"/>
+    <path d="M550 50 Q510 50 510 90 Q510 110 530 110 Q540 100 540 90"/>
+    <!-- Adjusted Y coordinates for bottom corners -->
+    <path d="M50 550 Q90 550 90 510 Q90 490 70 490 Q60 500 60 510"/>
+    <path d="M550 550 Q510 550 510 510 Q510 490 530 490 Q540 500 540 510"/>
+  </g>
+
+  <!-- Central Star (Re-centered) -->
+  <g transform="translate(300, 300)">
+    <polygon class="star" points="0,-100 12,-25 100,0 12,25 0,100 -12,25 -100,0 -12,-25"/>
+  </g>
+
+  <!-- Secondary Star (Repositioned below center) -->
+  <g transform="translate(300, 450) scale(0.6)">
+    <polygon class="star" points="0,-100 12,-25 100,0 12,25 0,100 -12,25 -100,0 -12,-25"/>
+  </g>
+
+  <!-- Crescent Moon (Repositioned above center) -->
+  <g transform="translate(300, 150)">
+    <path class="gold" d="M40,0 A40,40 0 1,1 -40,0 A30,40 0 1,0 40,0Z"/>
+  </g>
+
+  <!-- Circular Star Orbit Arcs (Re-centered) -->
+  <g stroke="#f6d06b" stroke-width="1" fill="none" stroke-dasharray="2,6">
+    <circle cx="300" cy="300" r="120"/>
+    <circle cx="300" cy="300" r="180"/>
+    <circle cx="300" cy="300" r="240"/>
+    <circle cx="300" cy="300" r="280"/> <!-- Added another orbit -->
+  </g>
+
+  <!-- Constellation Dots (Repositioned and expanded) -->
+  <g>
+    <!-- Original dots shifted up -->
+    <circle class="dot" cx="300" cy="105"/>
+    <circle class="dot" cx="360" cy="155"/>
+    <circle class="dot" cx="420" cy="235"/>
+    <circle class="dot" cx="430" cy="315"/>
+    <circle class="dot" cx="415" cy="395"/>
+    <circle class="dot" cx="370" cy="475"/>
+    <circle class="dot" cx="300" cy="495"/>
+    <circle class="dot" cx="230" cy="475"/>
+    <circle class="dot" cx="185" cy="395"/>
+    <circle class="dot" cx="170" cy="315"/>
+    <circle class="dot" cx="185" cy="235"/>
+    <circle class="dot" cx="240" cy="155"/>
+    <!-- Added more dots -->
+    <circle class="dot" cx="270" cy="200"/>
+    <circle class="dot" cx="330" cy="200"/>
+    <circle class="dot" cx="200" cy="280"/>
+    <circle class="dot" cx="400" cy="280"/>
+    <circle class="dot" cx="250" cy="360"/>
+    <circle class="dot" cx="350" cy="360"/>
+    <circle class="dot" cx="210" cy="440"/>
+    <circle class="dot" cx="390" cy="440"/>
+  </g>
+
+  <!-- Twinkling Stars (Repositioned and expanded) -->
+  <g class="star">
+    <!-- Original stars repositioned -->
+    <polygon points="295,100 300,85 305,100 320,105 305,110 300,125 295,110 280,105" /> <!-- Near moon -->
+    <polygon points="500,300 505,285 510,300 525,305 510,310 505,325 500,310 485,305" /> <!-- Right side -->
+    <polygon points="100,300 105,285 110,300 125,305 110,310 105,325 100,310 85,305" /> <!-- Left side -->
+    <polygon points="300,500 305,485 310,500 325,505 310,510 305,525 300,510 285,505" /> <!-- Bottom side -->
+    <!-- Added more stars -->
+    <polygon points="150,150 154,140 158,150 168,154 158,158 154,168 150,158 140,154" transform="scale(0.8)"/>
+    <polygon points="450,150 454,140 458,150 468,154 458,158 454,168 450,158 440,154" transform="scale(0.8)"/>
+    <polygon points="150,450 154,440 158,450 168,454 158,458 154,468 150,458 140,454" transform="scale(0.8)"/>
+    <polygon points="450,450 454,440 458,450 468,454 458,458 454,468 450,458 440,454" transform="scale(0.8)"/>
+    <polygon points="300,220 303,212 306,220 314,223 306,226 303,234 300,226 292,223" transform="scale(0.7)"/>
+    <polygon points="300,380 303,372 306,380 314,383 306,386 303,394 300,386 292,383" transform="scale(0.7)"/>
+  </g>
+
+  <!-- Tiny Background Sparkles (Expanded) -->
+  <g class="sparkle">
+    <!-- Original sparkles repositioned/kept -->
+    <circle cx="180" cy="100"/>
+    <circle cx="120" cy="220"/>
+    <circle cx="480" cy="180"/>
+    <circle cx="420" cy="500"/>
+    <circle cx="200" cy="500"/>
+    <circle cx="340" cy="530"/>
+    <circle cx="160" cy="400"/>
+    <circle cx="470" cy="540"/>
+    <circle cx="440" cy="80"/>
+    <circle cx="160" cy="90"/>
+    <!-- Added many more sparkles -->
+    <circle cx="70" cy="70"/>
+    <circle cx="530" cy="70"/>
+    <circle cx="70" cy="530"/>
+    <circle cx="530" cy="530"/>
+    <circle cx="300" cy="60"/>
+    <circle cx="60" cy="300"/>
+    <circle cx="540" cy="300"/>
+    <circle cx="300" cy="540"/>
+    <circle cx="150" cy="250"/>
+    <circle cx="450" cy="250"/>
+    <circle cx="150" cy="350"/>
+    <circle cx="450" cy="350"/>
+    <circle cx="220" cy="120"/>
+    <circle cx="380" cy="120"/>
+    <circle cx="220" cy="480"/>
+    <circle cx="380" cy="480"/>
+    <circle cx="100" cy="180"/>
+    <circle cx="500" cy="180"/>
+    <circle cx="100" cy="420"/>
+    <circle cx="500" cy="420"/>
+    <circle cx="250" cy="50"/>
+    <circle cx="350" cy="50"/>
+    <circle cx="250" cy="550"/>
+    <circle cx="350" cy="550"/>
+    <circle cx="50" cy="250"/>
+    <circle cx="550" cy="250"/>
+    <circle cx="50" cy="350"/>
+    <circle cx="550" cy="350"/>
+  </g>
+</svg>

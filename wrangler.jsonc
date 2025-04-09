@@ -1,0 +1,72 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ttelements-com",
+  "main": "worker/index.ts",
+  "preview_urls": false,
+  "workers_dev": false,
+  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_date": "2025-04-08",
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS",
+  },
+  "env": {
+    "production": {
+      "vars": {
+        "MAILGUN_RETURN_HOST": "https://ttelements.com",
+      },
+      "durable_objects": {
+        "bindings": [
+          { "name": "GAME", "class_name": "Game" },
+          { "name": "USER", "class_name": "User" },
+          { "name": "CARD_COLLECTION", "class_name": "CardCollection" },
+        ],
+      },
+      "migrations": [
+        { "tag": "v1", "new_classes": ["Game", "User", "CardCollection"] },
+      ],
+      "kv_namespaces": [
+        {
+          "id": "26b5d2a435e146fe904652c2cab4d62d",
+          "binding": "ACCESS_TOKENS",
+        },
+        {
+          "id": "e1e4429a6994412c9507bf899d6e728e",
+          "binding": "SOCKET_TOKENS",
+        },
+      ],
+    },
+    "dev": {
+      "vars": {
+        "MAILGUN_RETURN_HOST": "http://localhost:5173",
+      },
+      "durable_objects": {
+        "bindings": [
+          { "name": "GAME", "class_name": "Game" },
+          { "name": "USER", "class_name": "User" },
+          { "name": "CARD_COLLECTION", "class_name": "CardCollection" },
+        ],
+      },
+      "migrations": [
+        { "tag": "v1", "new_classes": ["Game", "User", "CardCollection"] },
+      ],
+      "kv_namespaces": [
+        {
+          "id": "26b5d2a435e146fe904652c2cab4d62d",
+          "binding": "ACCESS_TOKENS",
+        },
+        {
+          "id": "e1e4429a6994412c9507bf899d6e728e",
+          "binding": "SOCKET_TOKENS",
+        },
+      ],
+    },
+  },
+  "observability": {
+    "enabled": true,
+  },
+}

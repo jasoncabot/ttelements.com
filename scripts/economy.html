@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Card Pack Simulator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    .pack { margin: 10px 0; }
+    .results { margin-top: 20px; }
+    pre { background: #f0f0f0; padding: 10px; }
+    .card-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; }
+    .card-grid div { border: 1px solid #ccc; padding: 4px; text-align: center; font-size: 0.8em; }
+    .collected { background: #c8f7c5; }
+    .config-inputs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .config-inputs input { width: 60px; }
+  </style>
+</head>
+<body>
+  <h1>Card Pack Simulator</h1>
+
+  <div class="config-inputs">
+    <div><strong>Basic Pack</strong></div>
+    <label>Common: <input type="number" id="basic-common" value="4"></label>
+    <label>Uncommon%: <input type="number" id="basic-uncommon" value="96"></label>
+    <label>Rare%: <input type="number" id="basic-rare" value="3"></label>
+    <label>Ultra%: <input type="number" id="basic-ultra" value="1"></label>
+  </div>
+
+  <div class="config-inputs">
+    <div><strong>Premium Pack</strong></div>
+    <label>Common: <input type="number" id="premium-common" value="2"></label>
+    <label>Uncommon: <input type="number" id="premium-uncommon" value="2"></label>
+    <label>Rare%: <input type="number" id="premium-rare" value="85"></label>
+    <label>Ultra%: <input type="number" id="premium-ultra" value="10"></label>
+    <label>Legendary%: <input type="number" id="premium-legendary" value="5"></label>
+  </div>
+
+  <div class="config-inputs">
+    <div><strong>Ultimate Pack</strong></div>
+    <label>Common: <input type="number" id="ultimate-common" value="1"></label>
+    <label>Uncommon: <input type="number" id="ultimate-uncommon" value="1"></label>
+    <label>Rare: <input type="number" id="ultimate-rare" value="1"></label>
+    <label>Ultra%: <input type="number" id="ultimate-ultra" value="80"></label>
+    <label>Legendary%: <input type="number" id="ultimate-legendary" value="20"></label>
+  </div>
+
+  <button onclick="updatePackConfigs()">Apply Config Changes</button>
+
+  <button onclick="openPacks('basic', 10)">Open 10 Basic Packs</button>
+  <button onclick="openPacks('premium', 10)">Open 10 Premium Packs</button>
+  <button onclick="openPacks('ultimate', 10)">Open 10 Ultimate Packs</button>
+  <button onclick="resetCollection()">Reset Collection</button>
+  <button onclick="runMonteCarlo()">Run Monte Carlo</button>
+
+  <div class="results">
+    <h2>Collection Progress</h2>
+    <p id="progress"></p>
+    <div id="collection" class="card-grid"></div>
+
+    <h2>Last Opened Packs</h2>
+    <pre id="output"></pre>
+
+    <h2>Monte Carlo Simulation</h2>
+    <canvas id="mcChart" width="600" height="300"></canvas>
+  </div>
+
+  <script>
+    const cards = [];
+    for (let level = 1; level <= 10; level++) {
+      const rarity = level <= 5 ? "Common" : level <= 7 ? "Uncommon" :
+                     level === 8 ? "Rare" : level === 9 ? "Ultra-Rare" : "Legendary";
+      for (let i = 1; i <= 11; i++) {
+        cards.push({
+          id: `L${String(level).padStart(2, '0')}-C${String(i).padStart(2, '0')}`,
+          level,
+          rarity,
+          dropMultiplier: i <= 2 ? 0.25 : 1.0
+        });
+      }
+    }
+
+    let packTypes = {};
+
+    function updatePackConfigs() {
+      packTypes = {
+        basic: {
+          cost: 100,
+          config: [
+            { rarity: 'Common', count: parseInt(document.getElementById('basic-common').value) },
+            {
+              chanceTable: [
+                { rarity: 'Uncommon', weight: parseInt(document.getElementById('basic-uncommon').value) },
+                { rarity: 'Rare', weight: parseInt(document.getElementById('basic-rare').value) },
+                { rarity: 'Ultra-Rare', weight: parseInt(document.getElementById('basic-ultra').value) }
+              ],
+              count: 1
+            }
+          ]
+        },
+        premium: {
+          cost: 500,
+          config: [
+            { rarity: 'Common', count: parseInt(document.getElementById('premium-common').value) },
+            { rarity: 'Uncommon', count: parseInt(document.getElementById('premium-uncommon').value) },
+            {
+              chanceTable: [
+                { rarity: 'Rare', weight: parseInt(document.getElementById('premium-rare').value) },
+                { rarity: 'Ultra-Rare', weight: parseInt(document.getElementById('premium-ultra').value) },
+                { rarity: 'Legendary', weight: parseInt(document.getElementById('premium-legendary').value) }
+              ],
+              count: 1
+            }
+          ]
+        },
+        ultimate: {
+          cost: 1000,
+          config: [
+            { rarity: 'Common', count: parseInt(document.getElementById('ultimate-common').value) },
+            { rarity: 'Uncommon', count: parseInt(document.getElementById('ultimate-uncommon').value) },
+            { rarity: 'Rare', count: parseInt(document.getElementById('ultimate-rare').value) },
+            {
+              chanceTable: [
+                { rarity: 'Ultra-Rare', weight: parseInt(document.getElementById('ultimate-ultra').value) },
+                { rarity: 'Legendary', weight: parseInt(document.getElementById('ultimate-legendary').value) }
+              ],
+              count: 2
+            }
+          ]
+        }
+      };
+    }
+
+    updatePackConfigs();
+
+    const collection = {};
+
+    function pickWeighted(items) {
+      const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
+      let r = Math.random() * totalWeight;
+      for (const item of items) {
+        if ((r -= item.weight) < 0) return item;
+      }
+    }
+
+    function openPacks(type, count) {
+      const pulls = [];
+      for (let p = 0; p < count; p++) {
+        const config = packTypes[type].config;
+        for (const entry of config) {
+          for (let i = 0; i < entry.count; i++) {
+            const rarity = entry.rarity || pickWeighted(entry.chanceTable).rarity;
+            const candidates = cards.filter(c => c.rarity === rarity);
+            const weighted = candidates.map(c => ({ card: c, weight: c.dropMultiplier }));
+            const chosen = pickWeighted(weighted).card;
+            pulls.push(chosen);
+            collection[chosen.id] = true;
+          }
+        }
+      }
+      showResults(pulls);
+    }
+
+    function showResults(pulls) {
+      const byRarity = pulls.reduce((acc, c) => {
+        acc[c.rarity] = (acc[c.rarity] || 0) + 1;
+        return acc;
+      }, {});
+      const output = pulls.map(c => `${c.id} (${c.rarity})`).join("\n");
+      const percentComplete = Math.round((Object.keys(collection).length / cards.length) * 100);
+
+      document.getElementById('output').textContent =
+        `Rarity Summary: ${JSON.stringify(byRarity)}\n\n` + output;
+      document.getElementById('progress').textContent =
+        `${Object.keys(collection).length} / ${cards.length} cards collected (${percentComplete}%)`;
+      renderCollection();
+    }
+
+    function renderCollection() {
+      const grid = document.getElementById('collection');
+      grid.innerHTML = '';
+      cards.forEach(card => {
+        const div = document.createElement('div');
+        div.textContent = card.id;
+        if (collection[card.id]) div.classList.add('collected');
+        grid.appendChild(div);
+      });
+    }
+
+    function resetCollection() {
+      for (let k in collection) delete collection[k];
+      document.getElementById('output').textContent = '';
+      document.getElementById('progress').textContent = '0%';
+      renderCollection();
+    }
+
+    function runMonteCarlo() {
+      const results = [];
+      for (let sim = 0; sim < 100; sim++) {
+        const simCollection = {};
+        let packs = 0;
+        while (Object.keys(simCollection).length < cards.length && packs < 1000) {
+          const pulls = [];
+          const config = packTypes["ultimate"].config;
+          for (const entry of config) {
+            for (let i = 0; i < entry.count; i++) {
+              const rarity = entry.rarity || pickWeighted(entry.chanceTable).rarity;
+              const candidates = cards.filter(c => c.rarity === rarity);
+              const weighted = candidates.map(c => ({ card: c, weight: c.dropMultiplier }));
+              const chosen = pickWeighted(weighted).card;
+              simCollection[chosen.id] = true;
+            }
+          }
+          packs++;
+        }
+        results.push(packs);
+      }
+      plotMonteCarlo(results);
+    }
+
+    function plotMonteCarlo(data) {
+      const ctx = document.getElementById('mcChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map((_, i) => i + 1),
+          datasets: [{
+            label: 'Packs to Complete Set (Ultimate)',
+            data,
+            backgroundColor: '#4caf50'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
