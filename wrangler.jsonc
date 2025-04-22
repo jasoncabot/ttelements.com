@@ -4,28 +4,29 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "ttelements-com-production",
+  "name": "ttelements-com",
   "main": "worker/index.ts",
-  "routes": [
-    {
-      "pattern": "ttelements.com",
-      "custom_domain": true,
-    },
-  ],
   "preview_urls": false,
   "workers_dev": false,
   "compatibility_flags": ["nodejs_compat"],
   "compatibility_date": "2025-04-08",
-  "assets": {
-    "not_found_handling": "single-page-application",
-    "binding": "ASSETS",
-  },
   "env": {
     "production": {
       "name": "ttelements-com-production",
+      "routes": [
+        {
+          "pattern": "ttelements.com",
+          "custom_domain": true,
+        },
+      ],
       "vars": {
         "MAILGUN_RETURN_HOST": "https://ttelements.com",
       },
+      "assets": {
+        "not_found_handling": "single-page-application",
+        "binding": "ASSETS",
+      },
+
       "durable_objects": {
         "bindings": [
           { "name": "GAME", "class_name": "Game" },
@@ -51,6 +52,10 @@
       "name": "ttelements-com-dev",
       "vars": {
         "MAILGUN_RETURN_HOST": "http://localhost:5173",
+      },
+      "assets": {
+        "not_found_handling": "single-page-application",
+        "binding": "ASSETS",
       },
       "durable_objects": {
         "bindings": [
