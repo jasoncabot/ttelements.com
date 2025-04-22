@@ -4,7 +4,7 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "ttelements-com",
+  "name": "ttelements-com-production",
   "main": "worker/index.ts",
   "routes": [
     {
