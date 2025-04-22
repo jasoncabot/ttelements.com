@@ -95,7 +95,7 @@ const LibraryList: React.FC<LibraryListProps> = ({ data }) => {
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <MenuItems className="ring-opacity-5 absolute left-0 z-10 mt-2 w-full origin-top-right rounded-md bg-gray-800 shadow-lg ring-1 ring-black focus:outline-none">
+            <MenuItems className="ring-opacity-5 absolute left-0 z-10 mt-2 max-h-60 w-full origin-top-right overflow-y-auto rounded-md bg-gray-800 shadow-lg ring-1 ring-black focus:outline-none">
               <div className="py-1">
                 {Array.from(data.get(selectedEdition)?.keys() || []).map(
                   (level) => (
