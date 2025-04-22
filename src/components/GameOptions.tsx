@@ -4,9 +4,14 @@ import {
   Label,
   Radio,
   RadioGroup,
-  Switch
+  Switch,
 } from "@headlessui/react";
-import { FaceFrownIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowsRightLeftIcon,
+  DocumentIcon,
+  FaceFrownIcon,
+  UserIcon
+} from "@heroicons/react/24/outline";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/solid";
 import { SyntheticEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -366,9 +371,12 @@ const GameOptions = () => {
             <li
               key="opponent"
               title={opponents.find((o) => o.key === opponentType)?.description}
-              className="mt-4 mr-4 ml-0 flex cursor-pointer items-center justify-center rounded-full bg-slate-500 px-4 py-2 font-sans text-sm font-semibold text-white no-underline shadow-md"
+              className="mt-4 mr-4 ml-0 flex cursor-pointer items-center justify-center rounded-full bg-amber-600 px-4 py-2 font-sans text-sm font-semibold text-white no-underline shadow-md"
             >
-              {opponents.find((o) => o.key === opponentType)?.title}
+              <UserIcon className="h-5 w-5 text-white" />
+              <span>
+                {opponents.find((o) => o.key === opponentType)?.title}
+              </span>
             </li>
 
             {rules && rules.length > 0 ? (
@@ -378,19 +386,21 @@ const GameOptions = () => {
                   <li
                     key={rule.title}
                     title={rule.description.on}
-                    className="mt-4 mr-4 ml-0 flex cursor-pointer items-center justify-center rounded-full bg-slate-500 px-4 py-2 font-sans text-sm font-semibold text-white no-underline shadow-md"
+                    className="mt-4 mr-4 ml-0 flex cursor-pointer items-center justify-center rounded-full bg-sky-700 px-4 py-2 font-sans text-sm font-semibold text-white no-underline shadow-md"
                   >
-                    {rule.title}
+                    <DocumentIcon className="h-5 w-5 text-white" />
+                    <span className="ml-1">{rule.title}</span>
                   </li>
                 ))
             ) : (
               <li>None</li>
             )}
             <li
-              className="mt-4 flex cursor-pointer items-center justify-center rounded-full bg-slate-500 px-4 py-2 font-sans text-sm font-semibold text-white no-underline shadow-md"
+              className="mt-4 mr-4 ml-0 flex cursor-pointer items-center justify-center gap-2 rounded-full bg-emerald-700 px-4 py-2 font-sans text-sm font-semibold text-white no-underline shadow-md transition hover:bg-emerald-800"
               title={tradeRules[tradeRuleIdx].description}
             >
-              Trade: {tradeRules[tradeRuleIdx].title}
+              <ArrowsRightLeftIcon className="h-5 w-5 text-white" />
+              <span>{tradeRules[tradeRuleIdx].title}</span>
             </li>
           </ul>
           <button

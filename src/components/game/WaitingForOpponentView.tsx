@@ -36,7 +36,7 @@ const WaitingForOpponentView: React.FC<{
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-start md:justify-center p-4">
+    <div className="flex min-h-screen flex-col items-center justify-start p-4 md:justify-center">
       <div className="w-full max-w-lg rounded-2xl border border-gray-700 bg-gray-900 bg-gradient-to-b from-gray-900 to-gray-800 p-8 shadow-xl">
         <div className="flex flex-col items-center">
           <UserGroupIcon
@@ -63,7 +63,7 @@ const WaitingForOpponentView: React.FC<{
             />
             <button
               type="button"
-              className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-amber-500 hover:bg-amber-500/10 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+              className="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer rounded p-1 text-amber-500 hover:bg-amber-500/10 focus:ring-2 focus:ring-amber-400 focus:outline-none"
               onClick={handleCopy}
               aria-label="Copy link"
             >
@@ -79,7 +79,7 @@ const WaitingForOpponentView: React.FC<{
           </div>
           <button
             type="button"
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-bold text-white shadow hover:bg-amber-600 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-bold text-white shadow hover:bg-amber-600 focus:ring-2 focus:ring-amber-400 focus:outline-none"
             onClick={handleCopy}
           >
             <ClipboardIcon className="h-5 w-5" aria-hidden="true" />
