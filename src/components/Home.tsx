@@ -70,10 +70,12 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col p-4 md:p-12">
-      <h1 className="text-3xl font-bold tracking-tight">Games</h1>
-      <div className="my-8 rounded bg-gray-900 p-8">
-        <div className="grid grid-cols-1 gap-4 rounded p-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="flex min-h-screen w-full flex-col p-4 text-gray-300 md:p-12">
+      <div className="mb-8 flex items-center justify-between rounded-lg bg-gray-800/50 p-4 shadow-md">
+        <h1 className="text-3xl font-bold tracking-tight text-white">Games</h1>
+      </div>
+      <div className="flex flex-col transition-opacity duration-300">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {games.map(({ id, createdAt, creator, rules, tradeRule }, index) => (
             <JoinableGameCard
               key={id}
@@ -88,13 +90,15 @@ const Home: React.FC = () => {
           ))}
         </div>
       </div>
-      <h1 className="text-3xl font-bold tracking-tight">Latest News</h1>
-      <div className="my-8 rounded bg-gray-900 p-8">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mb-8 mt-16 flex items-center justify-between rounded-lg bg-gray-800/50 p-4 shadow-md">
+        <h1 className="text-3xl font-bold tracking-tight text-white">Latest News</h1>
+      </div>
+      <div className="flex flex-col transition-opacity duration-300">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {news.map(({ title, description }) => (
             <div
               key={title}
-              className="overflow-hidden rounded-lg bg-white shadow-lg"
+              className="overflow-hidden rounded-lg bg-white/90 shadow-lg border border-gray-200 hover:shadow-xl transition"
             >
               <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-900">{title}</h3>

@@ -198,9 +198,9 @@ export class User extends DurableObject<Env> {
           }
 
           const requiredPoints = {
-            basic: 0, //100,
-            premium: 0, // 500,
-            ultimate: 0, // 1000,
+            basic: 100,
+            premium: 500,
+            ultimate: 1000,
           }[req.kind];
 
           // ensure we have enough points to make this purchase

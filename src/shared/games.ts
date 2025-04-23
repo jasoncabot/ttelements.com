@@ -8,7 +8,14 @@ export type GameState =
   | "Trading"
   | "Completed";
 
+export enum OpponentType {
+  Computer = "computer",
+  Public = "public",
+  Private = "private",
+}
+
 export type CreateRequest = {
+  opponent: OpponentType;
   rules: GameRule[];
   tradeRule: GameTradeRule;
 };

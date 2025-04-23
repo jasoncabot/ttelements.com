@@ -23,6 +23,7 @@ import {
 } from "../../src/shared";
 import { listOwnedCardsAction } from "./card-collection";
 import { GameUpdateResponse } from "../../src/shared/flips";
+import { OpponentType } from "../../src/shared/games";
 
 export const createGameAction = (
   userId: string,
@@ -893,16 +894,18 @@ const handleCreate = async (
     }),
   };
 
-  const joinableGame = {
-    id: gameId,
-    creator: emailHash,
-    createdAt: new Date().toISOString(),
-    rules: request.rules,
-    tradeRule: request.tradeRule,
-  } as JoinableGame;
+  if (request.opponent == OpponentType.Public) {
+    const joinableGame = {
+      id: gameId,
+      creator: emailHash,
+      createdAt: new Date().toISOString(),
+      rules: request.rules,
+      tradeRule: request.tradeRule,
+    } as JoinableGame;
 
-  state.storage.put<JoinableGame>(`open:${gameId}`, joinableGame);
-  state.storage.put<JoinableGame>(`u:${userId}:open:${gameId}`, joinableGame);
+    state.storage.put<JoinableGame>(`open:${gameId}`, joinableGame);
+    state.storage.put<JoinableGame>(`u:${userId}:open:${gameId}`, joinableGame);
+  }
 
   const id = env.GAME.idFromName(gameId);
   const obj = env.GAME.get(id);

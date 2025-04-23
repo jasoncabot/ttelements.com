@@ -10,7 +10,7 @@ import {
   ArrowsRightLeftIcon,
   DocumentIcon,
   FaceFrownIcon,
-  UserIcon
+  UserIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/solid";
 import { SyntheticEvent, useEffect, useState } from "react";
@@ -29,12 +29,7 @@ import {
 import JoinGame from "./game/JoinGame";
 import GameRulePanel from "./GameRulePanel";
 import { useMessageBanner } from "./MessageBanner";
-
-enum OpponentType {
-  Computer = "computer",
-  Public = "public",
-  Private = "private",
-}
+import { OpponentType } from "../shared/games";
 
 const GameOptions = () => {
   const { fetchData } = useAuth();
@@ -176,6 +171,7 @@ const GameOptions = () => {
         "POST",
         `/games`,
         {
+          opponent: opponentType,
           rules: rules
             .filter((rule) => rule.toggle[0])
             .map((rule) => rule.key as GameRule),

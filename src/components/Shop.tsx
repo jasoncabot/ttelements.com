@@ -1,4 +1,9 @@
-import { CreditCardIcon, StarIcon } from "@heroicons/react/24/outline";
+import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
+import {
+  CreditCardIcon,
+  StarIcon as EmptyStarIcon,
+} from "@heroicons/react/24/outline";
+import { StarIcon } from "@heroicons/react/24/solid";
 import { SyntheticEvent, useEffect, useState } from "react";
 import { useAuth } from "../providers/hooks";
 import { AuthStatus } from "../services/AuthService";
@@ -8,35 +13,38 @@ import {
   UserDetailsResponse,
   ViewableCardResponse,
 } from "../shared";
+import { PurchaseKind } from "../shared/shop";
 import BoosterPackViewer from "./BoosterPackViewer";
 import CardRevealer from "./CardRevealer";
 import { useMessageBanner } from "./MessageBanner";
-import { PurchaseKind } from "../shared/shop";
-import { Dialog, DialogBackdrop } from "@headlessui/react";
 
 const purchasable: {
   name: string;
   key: PurchaseKind;
   description: string[];
   price: number;
+  starCount: number;
 }[] = [
   {
     name: "Basic Pack",
     key: "basic",
-    description: ["5 x Common", "5 x Uncommon", "1 x Rare"],
+    description: ["Some cards"],
     price: 0, //100,
+    starCount: 1,
   },
   {
     name: "Premium Pack",
     key: "premium",
-    description: ["5 x Rare", "5 x Epic", "1 x Legendary"],
+    description: ["Some better cards"],
     price: 0, //500,
+    starCount: 2,
   },
   {
     name: "Ultimate Pack",
     key: "ultimate",
-    description: ["5 x Epic", "5 x Legendary", "1 x Mythic"],
+    description: ["The best cards"],
     price: 0, //1000,
+    starCount: 3,
   },
 ];
 
@@ -133,15 +141,15 @@ const Shop = () => {
         onClose={handleCloseViewer}
         className="relative z-50"
       >
-        <DialogBackdrop className="fixed inset-0 bg-black/30" />
+        <DialogBackdrop className="fixed inset-0 bg-black opacity-50" />
         <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-          <BoosterPackViewer
-            packKey={selectedPackKey || "basic"}
-            onClose={handleCloseViewer}
-            onOpenComplete={confirmPurchase}
-          >
-            {" "}
-          </BoosterPackViewer>
+          <DialogPanel className="w-full max-w-md">
+            <BoosterPackViewer
+              packKey={selectedPackKey || "basic"}
+              onClose={handleCloseViewer}
+              onOpenComplete={confirmPurchase}
+            ></BoosterPackViewer>
+          </DialogPanel>
         </div>
       </Dialog>
 
@@ -183,7 +191,19 @@ const Shop = () => {
                         <div className="ml-2">{desc}</div>
                       </div>
                       <div className="flex items-center">
-                        <StarIcon className="h-5 w-5 text-gray-400" />
+                        {/* Display stars based on pack.starCount */}
+                        {Array.from({ length: pack.starCount }, (_, i) => (
+                          <StarIcon
+                            key={i}
+                            className="h-5 w-5 text-yellow-400"
+                          />
+                        ))}
+                        {Array.from({ length: 3 - pack.starCount }, (_, i) => (
+                          <EmptyStarIcon
+                            key={i}
+                            className="h-5 w-5 text-gray-400"
+                          />
+                        ))}
                       </div>
                     </li>
                   ))}
