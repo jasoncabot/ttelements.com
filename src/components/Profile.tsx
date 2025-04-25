@@ -43,7 +43,7 @@ const Profile: React.FC<object> = () => {
         </h1>
       </div>
       <div className="flex flex-col transition-opacity duration-300">
-        <div className="mt-8 flex flex-col justify-between rounded-lg bg-gray-900 p-8 shadow-md">
+        <div className="rounded-lg bg-gray-800 px-4 py-5 sm:p-6">
           <div className="flex flex-col items-start">
             <div className="flex items-center">
               <div className="h-12 w-12 flex-shrink-0">

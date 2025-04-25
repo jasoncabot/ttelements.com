@@ -92,10 +92,16 @@ const Library = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full flex-col p-4 md:p-12">
-      <h1 className="text-3xl font-bold tracking-tight">Card Collection</h1>
-      <div className="mt-8 rounded bg-gray-900 p-8">
-        <LibraryList data={cards} />
+    <div className="flex min-h-screen w-full flex-col p-4 text-gray-300 md:p-12">
+      <div className="mb-8 flex items-center justify-between rounded-lg bg-gray-800/50 p-4 shadow-md">
+        <h1 className="text-3xl font-bold tracking-tight text-white">
+          Library
+        </h1>
+      </div>
+      <div className="flex flex-col transition-opacity duration-300">
+        <div className="rounded-lg bg-gray-800 px-4 py-5 sm:p-6">
+          <LibraryList data={cards} />
+        </div>
       </div>
     </div>
   );

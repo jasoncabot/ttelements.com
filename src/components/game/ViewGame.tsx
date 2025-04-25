@@ -11,10 +11,10 @@ import {
   JoinRequest,
   PlayCardRequest,
 } from "../../shared";
-import JoinableGameCard from "../JoinableGameCard";
 import Loading from "../Loading";
 import { useMessageBanner } from "../MessageBanner";
 import GameDetails from "./GameDetails";
+import JoinConfirmation from "./JoinConfirmation";
 import PickInProgressView from "./PickInProgressView";
 import TradingView from "./TradingView";
 import WaitingForOpponentView from "./WaitingForOpponentView";
@@ -35,11 +35,15 @@ const ViewGame = () => {
           "GET",
           `/games/${gameId}`,
           null,
-          AuthStatus.REQUIRED
+          AuthStatus.REQUIRED,
         );
         setGame(response);
-      } catch (e: any) {
-        showMessage(e.message);
+      } catch (e) {
+        if (e instanceof Error) {
+          showMessage(e.message);
+        } else {
+          showMessage("Unable to load game");
+        }
       }
     };
     if (gameId) {
@@ -57,11 +61,15 @@ const ViewGame = () => {
           "POST",
           `/games/${gameId}/ws`,
           null,
-          AuthStatus.REQUIRED
+          AuthStatus.REQUIRED,
         );
         setSocketToken(result.token);
-      } catch (e: any) {
-        showMessage(e.message);
+      } catch (e) {
+        if (e instanceof Error) {
+          showMessage(e.message);
+        } else {
+          showMessage("Unable to create socket token");
+        }
       }
     };
     if (gameId) {
@@ -72,19 +80,22 @@ const ViewGame = () => {
 
   const handleEventReceived = (event: GameEvent) => {
     switch (event.type) {
-      case "state-changed":
+      case "state-changed": {
         const gameResponse = event.data as GameResponse;
         setGame(gameResponse);
         return;
-      case "card-played":
+      }
+      case "card-played": {
         const cardPlayedResponse = event.data as CardPlayedEvent;
         console.log("doing flips " + cardPlayedResponse.space);
         return;
-      case "error":
+      }
+      case "error": {
         const message = event.data as string;
         console.error(message);
         showMessage(message);
         return;
+      }
     }
   };
 
@@ -94,7 +105,7 @@ const ViewGame = () => {
       // connect to the websocket
       const ws = new WebSocket(
         `${import.meta.env.VITE_WS_ENDPOINT}/games/${gameId}/ws?token=${socketToken}`,
-        []
+        [],
       );
       ws.onopen = () => {
         setSocket(ws);
@@ -142,11 +153,15 @@ const ViewGame = () => {
         "POST",
         `/games/${game.id}/cards`,
         chooseCards,
-        AuthStatus.REQUIRED
+        AuthStatus.REQUIRED,
       );
       setGame(response);
-    } catch (e: any) {
-      showMessage(e.message);
+    } catch (e) {
+      if (e instanceof Error) {
+        showMessage(e.message);
+      } else {
+        showMessage("Unable to choose cards");
+      }
     }
   };
 
@@ -162,11 +177,15 @@ const ViewGame = () => {
         "POST",
         `/games/${game.id}/trades`,
         cards,
-        AuthStatus.REQUIRED
+        AuthStatus.REQUIRED,
       );
       setGame(response);
-    } catch (e: any) {
-      showMessage(e.message);
+    } catch (e) {
+      if (e instanceof Error) {
+        showMessage(e.message);
+      } else {
+        showMessage("Unable to trade cards");
+      }
     }
   };
 
@@ -187,11 +206,15 @@ const ViewGame = () => {
         "POST",
         `/games/${game.id}/action`,
         move,
-        AuthStatus.REQUIRED
+        AuthStatus.REQUIRED,
       );
       setGame(response);
-    } catch (e: any) {
-      showMessage(e.message);
+    } catch (e) {
+      if (e instanceof Error) {
+        showMessage(e.message);
+      } else {
+        showMessage("Unable to play card");
+      }
     }
   };
 
@@ -201,15 +224,19 @@ const ViewGame = () => {
         "POST",
         `/games/${id}/player`,
         {} as JoinRequest,
-        AuthStatus.REQUIRED
+        AuthStatus.REQUIRED,
       );
       if (response.id) {
         setGame(response);
       } else {
         showMessage("Unable to join game");
       }
-    } catch (e: any) {
-      showMessage(e.message);
+    } catch (e) {
+      if (e instanceof Error) {
+        showMessage(e.message);
+      } else {
+        showMessage("Unable to join game");
+      }
     }
   };
 
@@ -222,27 +249,11 @@ const ViewGame = () => {
       if (game.you.id) {
         return <WaitingForOpponentView gameId={game.id} />;
       } else {
-        return (
-          <div className="p-8">
-            <h1 className="text-3xl font-bold tracking-tight">
-              Join this game?
-            </h1>
-            <div className="mt-8">
-              <JoinableGameCard
-                id={game.id}
-                index={0}
-                creator={game.opponent.emailHash}
-                rules={game.rules}
-                tradeRule={game.tradeRule}
-                onGameJoined={handleJoinGame}
-              />
-            </div>
-          </div>
-        );
+        return <JoinConfirmation game={game} onJoinGame={handleJoinGame} />;
       }
     case "PickInProgress":
       return <PickInProgressView onCardsChosen={handleChooseCards} />;
-    case "WaitingForOtherPlayer":
+    case "WaitingForOtherPlayer": {
       // if we have chosen our cards, then show a loading screen
       // otherwise display the pick in progress view again
       const youHaveSelectedYourCards =
@@ -254,6 +265,7 @@ const ViewGame = () => {
       } else {
         return <PickInProgressView onCardsChosen={handleChooseCards} />;
       }
+    }
     case "InProgress":
       return <GameDetails game={game} onPlayCard={handlePlayCard} />;
     case "Trading":
@@ -262,8 +274,8 @@ const ViewGame = () => {
       return (
         <div>
           <GameDetails game={game} onPlayCard={() => {}} />
-          <div className="overflow-none absolute left-0 top-0 z-10 h-full h-full w-full w-full bg-white/30 backdrop-blur-sm"></div>
-          <div className="align-center absolute left-0 top-0 z-20 flex h-full w-full items-center justify-center">
+          <div className="overflow-none absolute top-0 left-0 z-10 h-full w-full bg-white/30 backdrop-blur-sm"></div>
+          <div className="align-center absolute top-0 left-0 z-20 flex h-full w-full items-center justify-center">
             <div className="rounded-lg bg-gray-900 shadow-lg">
               <div className="m-2 rounded bg-gray-800 px-24 pb-4">
                 <WinningView game={game} />

@@ -65,6 +65,7 @@ export class User extends DurableObject<Env> {
         const allowList = [
           "21860adb182b9df4b5447ccc4fafa3061310e0cddc37a37847e420dedb4ad642",
           "b97c5484bf2a792ac0425012bb8e20f8b014d4fd89457a90ea2bf150f7ce9cbc",
+          "a58a22152c161e505b1f7d0e5731e18fcac93586473f796225fc0f71a2481c82",
         ];
         const hashedSignupEmail = await generateHash(
           req.email + "and some salty stuff",
@@ -288,7 +289,7 @@ const sendVerifyEmail = async (env: Env, recipient: string, code: string) => {
     "h:X-Mailgun-Variables",
     JSON.stringify({
       code: code,
-      verification_url: `${host}/register?email=${recipient}&code=${code}`,
+      verification_url: `${host}/register?email=${encodeURIComponent(recipient)}&code=${encodeURIComponent(code)}`,
       year: new Date().getFullYear(),
     }),
   );

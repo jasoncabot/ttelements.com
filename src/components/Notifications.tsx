@@ -376,6 +376,8 @@ const Notifications = () => {
           </button>
         </div>
       </div>
+
+      {/* error */}
       <div
         className={classNames(
           "overflow-hidden transition-all duration-300 ease-in-out",
@@ -395,34 +397,37 @@ const Notifications = () => {
           </div>
         )}
       </div>
-      <div className="overflow-hidden rounded-xl bg-gray-900 shadow-2xl ring-1 ring-gray-800">
-        {isLoading ? (
-          <div className="divide-y divide-gray-800">
-            <SkeletonRow />
-            <SkeletonRow />
-            <SkeletonRow />
-          </div>
-        ) : hasNotifications || deletingIds.size > 0 ? (
-          <div className="divide-y divide-gray-800">
-            {notificationsList.map((notification) => (
-              <NotificationRow
-                key={notification.id}
-                {...notification}
-                onDelete={handleDeleteNotification}
-                onMarkRead={handleMarkAsRead}
-                isDeleting={deletingIds.has(notification.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center space-y-4 p-10 text-center text-gray-500">
-            <InboxIcon className="h-16 w-16 text-amber-500" />
-            <p className="text-lg text-gray-300">All caught up!</p>
-            <p className="text-sm text-gray-400">
-              You have no new notifications.
-            </p>
-          </div>
-        )}
+
+      <div className="flex flex-col transition-opacity duration-300">
+        <div className="bg-gray-800">
+          {isLoading ? (
+            <div className="divide-y divide-gray-800">
+              <SkeletonRow />
+              <SkeletonRow />
+              <SkeletonRow />
+            </div>
+          ) : hasNotifications || deletingIds.size > 0 ? (
+            <div className="divide-y divide-gray-800">
+              {notificationsList.map((notification) => (
+                <NotificationRow
+                  key={notification.id}
+                  {...notification}
+                  onDelete={handleDeleteNotification}
+                  onMarkRead={handleMarkAsRead}
+                  isDeleting={deletingIds.has(notification.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center space-y-4 p-10 text-center text-gray-500">
+              <InboxIcon className="h-16 w-16 text-amber-500" />
+              <p className="text-lg text-gray-300">All caught up!</p>
+              <p className="text-sm text-gray-400">
+                You have no new notifications.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

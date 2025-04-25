@@ -7,10 +7,12 @@ interface LoadingProps {
 
 const Loading: React.FC<LoadingProps> = ({ message }) => {
   return (
-    <div className="mt-16 flex animate-pulse flex-col items-center justify-center">
-      <SparklesIcon className="h-12 w-12 text-white" />
-      <div className="mt-4 text-2xl font-bold text-white">
-        {message ?? "getting ready..."}
+    <div className="flex min-h-screen flex-col items-center justify-center text-amber-500">
+      <div className="flex flex-col items-center justify-center rounded-lg bg-gray-900 p-12 shadow-lg">
+        <SparklesIcon className="h-16 w-16" />
+        <div className="mt-6 animate-pulse text-2xl font-semibold">
+          {message ?? "getting ready..."}
+        </div>
       </div>
     </div>
   );
