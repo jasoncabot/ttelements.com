@@ -66,6 +66,8 @@ export class User extends DurableObject<Env> {
           "21860adb182b9df4b5447ccc4fafa3061310e0cddc37a37847e420dedb4ad642",
           "b97c5484bf2a792ac0425012bb8e20f8b014d4fd89457a90ea2bf150f7ce9cbc",
           "a58a22152c161e505b1f7d0e5731e18fcac93586473f796225fc0f71a2481c82",
+          "0044544feb806a2b6aacbff868cc6677f7a904f823655a85966ebfcb3a94df46",
+          "0b5751aeafa8da93319bdbdfe3a9532083669c86034523a65e78c414d7072390",
         ];
         const hashedSignupEmail = await generateHash(
           req.email + "and some salty stuff",
