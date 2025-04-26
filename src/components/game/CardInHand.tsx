@@ -1,25 +1,25 @@
-import { CardResponse } from "../../shared";
-import cardBack from "../../assets/images/back.svg";
 import { classNames } from "..";
+import cardBack from "../../assets/images/back.svg";
+import { ViewableCardResponse } from "../../shared";
 import CardDetail from "../CardDetail";
 
 const CardInHand: React.FC<{
   visible: boolean;
-  response: CardResponse;
+  card: ViewableCardResponse | undefined;
   index: number;
   selectedIndex?: number;
   onSelected?: (index: number) => void;
-}> = ({ visible, index, response, selectedIndex, onSelected }) => {
+}> = ({ visible, index, card, selectedIndex, onSelected }) => {
   const key = `${visible ? "mine" : "yours"}-${index}`;
-  const card = response.card;
   const anySelected = selectedIndex !== undefined && visible;
   const thisSelected = selectedIndex === index;
+
   if (!card) {
     return (
       <img
         key={key}
         alt="unknown card"
-        className="m-1 h-full w-full select-none overflow-hidden rounded-md border border-gray-800 shadow-md"
+        className="m-1 h-full w-full overflow-hidden rounded-md border border-gray-800 shadow-lg shadow-md select-none"
         src={cardBack}
       />
     );
@@ -37,10 +37,10 @@ const CardInHand: React.FC<{
       right={card.right}
       down={card.down}
       className={classNames(
-        "z-10 m-1 transition-transform duration-200 ease-in-out",
+        "z-10 m-1 cursor-pointer shadow-lg transition-transform duration-200 ease-in-out",
         { "hover:z-20 hover:scale-105": visible },
         { "opacity-80": anySelected && !thisSelected },
-        { "z-30 scale-105": anySelected && thisSelected }
+        { "z-30 scale-105": anySelected && thisSelected },
       )}
     >
       <div

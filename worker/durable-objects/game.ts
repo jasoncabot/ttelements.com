@@ -21,9 +21,8 @@ import {
   ViewableCardResponse,
   processFlips,
 } from "../../src/shared";
+import { CardPlayedResponse, OpponentType } from "../../src/shared/games";
 import { listOwnedCardsAction } from "./card-collection";
-import { GameUpdateResponse } from "../../src/shared/flips";
-import { OpponentType } from "../../src/shared/games";
 
 export const createGameAction = (
   userId: string,
@@ -575,6 +574,7 @@ const onGameStateChange = (
   game: GameEntry,
   connections: IterableIterator<Connection>,
 ) => {
+  // send the game state to all players
   for (const connection of connections) {
     const data: GameResponse = playerView(game, connection.userId);
     const event: GameEvent = {
@@ -587,24 +587,16 @@ const onGameStateChange = (
 
 const onCardPlayed = (
   game: GameEntry,
-  _flipResponse: GameUpdateResponse,
+  flipResponse: CardPlayedResponse,
   connections: IterableIterator<Connection>,
 ) => {
   for (const connection of connections) {
-    // // TODO: set this properly
-    // const data: CardPlayedEvent = {
-    //   space: space
-    //   card: toViewableCard(game.board[space].card),
-    // };
-    // const event: GameEvent = {
-    //   type: 'card-played',
-    //   data: data
-    // };
-    // connection.socket.send(JSON.stringify(event));
-    const data: GameResponse = playerView(game, connection.userId);
     const event: GameEvent = {
-      type: "state-changed",
-      data: data,
+      type: "card-played",
+      data: {
+        changes: flipResponse,
+        finalState: playerView(game, connection.userId),
+      },
     };
     connection.socket.send(JSON.stringify(event));
   }
@@ -646,9 +638,9 @@ const handlePlayCard = async (
   };
 
   const flipResponse = processFlips(playerView(game, userId), req.space);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  flipResponse.forEach((changes, _) => {
-    changes.forEach((change, space) => {
+  flipResponse.forEach((changes) => {
+    Object.entries(changes).forEach(([spaceStr, change]) => {
+      const space = parseInt(spaceStr, 10);
       if (change.type === "flip") {
         player.score++;
         const opponent = game.players[(game.turn + 1) % game.players.length];

@@ -1,29 +1,57 @@
 import { CardElement } from "./../src/shared";
 import { calculateFlips, processFlips } from "./../src/shared/flips";
 import { GameResponse, GameRule, SpaceResponse } from "./../src/shared";
+import { describe, expect, it, test } from "vitest";
 
-test("processFlips should be callable", () => {
-  expect(processFlips).toBeDefined();
-});
+interface Space {
+  space: number;
+  up: number;
+  down: number;
+  left: number;
+  right: number;
+  owner: "you" | "opponent";
+}
 
-test("placing a card should create a single change of type place", () => {
-  const game = gameWithCardsInSpaces(
-    [{ space: 0, up: 5, down: 5, left: 5, right: 5 }],
-    ["open"],
-  );
-  const space = 0;
+describe("processFlips", () => {
+  it("should be callable", () => {
+    expect(processFlips).toBeDefined();
+  });
 
-  const response = processFlips(game, space);
-  expect(response).toHaveLength(1);
-  expect(response[0].get(0)).toMatchObject({
-    type: "place",
-    direction: "none",
+  it("should create a single change of type place when placing a card", () => {
+    const game = gameWithCardsInSpaces(
+      [{ space: 0, up: 5, down: 5, left: 5, right: 5 }],
+      ["open"],
+    );
+    const space = 0;
+
+    const response = processFlips(game, space);
+    expect(response).toHaveLength(1);
+    expect(response[0][0]).toMatchObject({
+      type: "place",
+      direction: "none",
+    });
+  });
+
+  it("should convert to JSON correctly", () => {
+    const game = gameWithCardsInSpaces(
+      [{ space: 0, up: 5, down: 5, left: 5, right: 5 }],
+      ["open"],
+    );
+    const space = 0;
+
+    const response = processFlips(game, space);
+    expect(response).toHaveLength(1);
+    expect(response[0][0]).toMatchObject({
+      type: "place",
+      direction: "none",
+    });
+    expect(JSON.stringify(response)).toMatchSnapshot();
   });
 });
 
 describe("combo", () => {
   test("should not be triggered by a basic flip", () => {
-    const spaces: any[] = [
+    const spaces: Space[] = [
       { space: 0, up: 6, down: 6, left: 6, right: 6, owner: "you" },
 
       { space: 1, up: 5, down: 5, left: 5, right: 5, owner: "opponent" },
@@ -36,18 +64,18 @@ describe("combo", () => {
       0,
     );
     expect(response).toHaveLength(2);
-    expect(response[0].get(0)).toMatchObject({
+    expect(response[0][0]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(1)).toMatchObject({
+    expect(response[1][1]).toMatchObject({
       type: "flip",
       direction: "left",
     });
   });
 
   test("should be triggered by a special flip such as same", () => {
-    const spaces: any[] = [
+    const spaces: Space[] = [
       { space: 0, up: 6, down: 6, left: 6, right: 6, owner: "you" },
 
       { space: 1, up: 6, down: 6, left: 6, right: 6, owner: "opponent" },
@@ -60,19 +88,19 @@ describe("combo", () => {
       0,
     );
     expect(response).toHaveLength(3);
-    expect(response[0].get(0)).toMatchObject({
+    expect(response[0][0]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(1)).toMatchObject({
+    expect(response[1][1]).toMatchObject({
       type: "flip",
       direction: "left",
     });
-    expect(response[1].get(3)).toMatchObject({
+    expect(response[1][3]).toMatchObject({
       type: "flip",
       direction: "up",
     });
-    expect(response[2].get(2)).toMatchObject({
+    expect(response[2][2]).toMatchObject({
       type: "flip",
       direction: "left",
     });
@@ -96,7 +124,7 @@ describe("same rule", () => {
 
     const response = processFlips(game, space);
     expect(response).toHaveLength(1);
-    expect(response[0].get(4)).toMatchObject({
+    expect(response[0][4]).toMatchObject({
       type: "place",
       direction: "none",
     });
@@ -117,15 +145,15 @@ describe("same rule", () => {
 
     const response = processFlips(game, space);
     expect(response).toHaveLength(2);
-    expect(response[0].get(4)).toMatchObject({
+    expect(response[0][4]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(1)).toMatchObject({
+    expect(response[1][1]).toMatchObject({
       type: "flip",
       direction: "down",
     });
-    expect(response[1].get(3)).toMatchObject({
+    expect(response[1][3]).toMatchObject({
       type: "flip",
       direction: "right",
     });
@@ -146,15 +174,15 @@ describe("same rule", () => {
 
     const response = processFlips(game, space);
     expect(response).toHaveLength(2);
-    expect(response[0].get(4)).toMatchObject({
+    expect(response[0][4]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(1)).toMatchObject({
+    expect(response[1][1]).toMatchObject({
       type: "flip",
       direction: "down",
     });
-    expect(response[1].get(5)).toMatchObject({
+    expect(response[1][5]).toMatchObject({
       type: "flip",
       direction: "left",
     });
@@ -175,15 +203,15 @@ describe("same rule", () => {
     const space = 4;
     const response = processFlips(game, space);
     expect(response).toHaveLength(2);
-    expect(response[0].get(4)).toMatchObject({
+    expect(response[0][4]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(3)).toMatchObject({
+    expect(response[1][3]).toMatchObject({
       type: "flip",
       direction: "right",
     });
-    expect(response[1].get(7)).toMatchObject({
+    expect(response[1][7]).toMatchObject({
       type: "flip",
       direction: "up",
     });
@@ -204,15 +232,15 @@ describe("same rule", () => {
     const space = 4;
     const response = processFlips(game, space);
     expect(response).toHaveLength(2);
-    expect(response[0].get(4)).toMatchObject({
+    expect(response[0][4]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(5)).toMatchObject({
+    expect(response[1][5]).toMatchObject({
       type: "flip",
       direction: "left",
     });
-    expect(response[1].get(7)).toMatchObject({
+    expect(response[1][7]).toMatchObject({
       type: "flip",
       direction: "up",
     });
@@ -233,15 +261,15 @@ describe("same rule", () => {
     const space = 4;
     const response = processFlips(game, space);
     expect(response).toHaveLength(2);
-    expect(response[0].get(4)).toMatchObject({
+    expect(response[0][4]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(1)).toMatchObject({
+    expect(response[1][1]).toMatchObject({
       type: "flip",
       direction: "down",
     });
-    expect(response[1].get(7)).toMatchObject({
+    expect(response[1][7]).toMatchObject({
       type: "flip",
       direction: "up",
     });
@@ -262,15 +290,15 @@ describe("same rule", () => {
     const space = 4;
     const response = processFlips(game, space);
     expect(response).toHaveLength(2);
-    expect(response[0].get(4)).toMatchObject({
+    expect(response[0][4]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(3)).toMatchObject({
+    expect(response[1][3]).toMatchObject({
       type: "flip",
       direction: "right",
     });
-    expect(response[1].get(5)).toMatchObject({
+    expect(response[1][5]).toMatchObject({
       type: "flip",
       direction: "left",
     });
@@ -310,15 +338,15 @@ describe("plus rule", () => {
     referenceFlips.forEach((data) => {
       const response = processFlips(game, data.space);
       expect(response).toHaveLength(2);
-      expect(response[0].get(data.space)).toMatchObject({
+      expect(response[0][data.space]).toMatchObject({
         type: "place",
         direction: "none",
       });
-      expect(response[1].get(data.a)).toMatchObject({
+      expect(response[1][data.a]).toMatchObject({
         type: "flip",
         direction: data.ad,
       });
-      expect(response[1].get(data.b)).toMatchObject({
+      expect(response[1][data.b]).toMatchObject({
         type: "flip",
         direction: data.bd,
       });
@@ -351,11 +379,11 @@ describe("plus rule", () => {
     referenceFlips.forEach((data) => {
       const response = processFlips(game, data.space);
       expect(response).toHaveLength(2);
-      expect(response[0].get(data.space)).toMatchObject({
+      expect(response[0][data.space]).toMatchObject({
         type: "place",
         direction: "none",
       });
-      expect(response[1].get(4)).toMatchObject({
+      expect(response[1][4]).toMatchObject({
         type: "flip",
         direction: data.dir,
       });
@@ -389,11 +417,11 @@ describe("same wall rule", () => {
         const space = parseInt(key);
         const response = processFlips(game, space);
         expect(response).toHaveLength(2);
-        expect(response[0].get(space)).toMatchObject({
+        expect(response[0][space]).toMatchObject({
           type: "place",
           direction: "none",
         });
-        expect(response[1].get(4)).toMatchObject({
+        expect(response[1][4]).toMatchObject({
           type: "flip",
           direction: direction,
         });
@@ -433,11 +461,11 @@ describe("elemental rule", () => {
 
     const response = processFlips(game, space);
     expect(response).toHaveLength(2);
-    expect(response[0].get(0)).toMatchObject({
+    expect(response[0][0]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(1)).toMatchObject({
+    expect(response[1][1]).toMatchObject({
       type: "flip",
       direction: "left",
     });
@@ -473,11 +501,11 @@ describe("elemental rule", () => {
 
     const response = processFlips(game, space);
     expect(response).toHaveLength(2);
-    expect(response[0].get(0)).toMatchObject({
+    expect(response[0][0]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(1)).toMatchObject({
+    expect(response[1][1]).toMatchObject({
       type: "flip",
       direction: "left",
     });
@@ -513,7 +541,7 @@ describe("elemental rule", () => {
 
     const response = processFlips(game, space);
     expect(response).toHaveLength(1);
-    expect(response[0].get(0)).toMatchObject({
+    expect(response[0][0]).toMatchObject({
       type: "place",
       direction: "none",
     });
@@ -548,7 +576,7 @@ describe("elemental rule", () => {
 
     const response = processFlips(game, space);
     expect(response).toHaveLength(1);
-    expect(response[0].get(0)).toMatchObject({
+    expect(response[0][0]).toMatchObject({
       type: "place",
       direction: "none",
     });
@@ -583,11 +611,11 @@ describe("elemental rule", () => {
 
     const response = processFlips(game, space);
     expect(response).toHaveLength(2);
-    expect(response[0].get(0)).toMatchObject({
+    expect(response[0][0]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(1)).toMatchObject({
+    expect(response[1][1]).toMatchObject({
       type: "flip",
       direction: "left",
     });
@@ -595,7 +623,7 @@ describe("elemental rule", () => {
 });
 
 describe("basic flips", () => {
-  const spaces: any[] = [
+  const spaces: Space[] = [
     { space: 4, up: 6, down: 6, left: 6, right: 6, owner: "you" },
 
     { space: 0, up: 6, down: 6, left: 6, right: 6, owner: "you" },
@@ -612,38 +640,38 @@ describe("basic flips", () => {
   test("should flip the card next to it from centre", () => {
     const response = processFlips(gameWithCardsInSpaces(spaces, ["open"]), 4);
     expect(response).toHaveLength(2);
-    expect(response[0].get(4)).toMatchObject({
+    expect(response[0][4]).toMatchObject({
       type: "place",
       direction: "none",
     });
-    expect(response[1].get(1)).toMatchObject({
+    expect(response[1][1]).toMatchObject({
       type: "flip",
       direction: "down",
     });
-    expect(response[1].get(3)).toMatchObject({
+    expect(response[1][3]).toMatchObject({
       type: "flip",
       direction: "right",
     });
-    expect(response[1].get(5)).toMatchObject({
+    expect(response[1][5]).toMatchObject({
       type: "flip",
       direction: "left",
     });
-    expect(response[1].get(7)).toMatchObject({ type: "flip", direction: "up" });
+    expect(response[1][7]).toMatchObject({ type: "flip", direction: "up" });
   });
 
   describe("in a corner", () => {
     test("should flip from top left", () => {
       const response = processFlips(gameWithCardsInSpaces(spaces, ["open"]), 0);
       expect(response).toHaveLength(2);
-      expect(response[0].get(0)).toMatchObject({
+      expect(response[0][0]).toMatchObject({
         type: "place",
         direction: "none",
       });
-      expect(response[1].get(1)).toMatchObject({
+      expect(response[1][1]).toMatchObject({
         type: "flip",
         direction: "left",
       });
-      expect(response[1].get(3)).toMatchObject({
+      expect(response[1][3]).toMatchObject({
         type: "flip",
         direction: "up",
       });
@@ -652,15 +680,15 @@ describe("basic flips", () => {
     test("should flip from top right", () => {
       const response = processFlips(gameWithCardsInSpaces(spaces, ["open"]), 2);
       expect(response).toHaveLength(2);
-      expect(response[0].get(2)).toMatchObject({
+      expect(response[0][2]).toMatchObject({
         type: "place",
         direction: "none",
       });
-      expect(response[1].get(1)).toMatchObject({
+      expect(response[1][1]).toMatchObject({
         type: "flip",
         direction: "right",
       });
-      expect(response[1].get(5)).toMatchObject({
+      expect(response[1][5]).toMatchObject({
         type: "flip",
         direction: "up",
       });
@@ -669,15 +697,15 @@ describe("basic flips", () => {
     test("should flip from bottom left", () => {
       const response = processFlips(gameWithCardsInSpaces(spaces, ["open"]), 6);
       expect(response).toHaveLength(2);
-      expect(response[0].get(6)).toMatchObject({
+      expect(response[0][6]).toMatchObject({
         type: "place",
         direction: "none",
       });
-      expect(response[1].get(3)).toMatchObject({
+      expect(response[1][3]).toMatchObject({
         type: "flip",
         direction: "down",
       });
-      expect(response[1].get(7)).toMatchObject({
+      expect(response[1][7]).toMatchObject({
         type: "flip",
         direction: "left",
       });
@@ -686,15 +714,15 @@ describe("basic flips", () => {
     test("should flip from bottom right", () => {
       const response = processFlips(gameWithCardsInSpaces(spaces, ["open"]), 8);
       expect(response).toHaveLength(2);
-      expect(response[0].get(8)).toMatchObject({
+      expect(response[0][8]).toMatchObject({
         type: "place",
         direction: "none",
       });
-      expect(response[1].get(5)).toMatchObject({
+      expect(response[1][5]).toMatchObject({
         type: "flip",
         direction: "down",
       });
-      expect(response[1].get(7)).toMatchObject({
+      expect(response[1][7]).toMatchObject({
         type: "flip",
         direction: "right",
       });
@@ -720,7 +748,7 @@ describe("flipping a card", () => {
       [],
     );
     expect(result).toHaveLength(1);
-    expect(result[0].get(0)).toMatchObject({
+    expect(result[0][0]).toMatchObject({
       type: "place",
       direction: "none",
     });

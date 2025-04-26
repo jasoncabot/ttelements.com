@@ -110,6 +110,8 @@ type Notification = {
 };
 
 type NotificationProps = Notification & {
+  isFirst: boolean;
+  isLast: boolean;
   onDelete: (id: number) => void;
   onMarkRead: (id: number) => void;
   isDeleting: boolean; // Added for animation
@@ -130,9 +132,11 @@ const NotificationRow: React.FC<NotificationProps> = ({
   time,
   read,
   type,
+  isFirst,
+  isLast,
   onDelete,
   onMarkRead,
-  isDeleting, // Added
+  isDeleting,
 }) => {
   // Determine the main icon based on type, fallback to BellAlertIcon
   const TypeIcon = notificationIcons[type] || BellAlertIcon;
@@ -148,6 +152,8 @@ const NotificationRow: React.FC<NotificationProps> = ({
         read
           ? "bg-gray-800/50 hover:bg-gray-700/60"
           : "bg-gradient-to-r from-gray-700/80 to-gray-800/70 hover:from-gray-600/80 hover:to-gray-700/70 hover:shadow-md",
+        isFirst ? "rounded-t-lg" : "",
+        isLast ? "rounded-b-lg" : "",
         read ? "cursor-default" : "cursor-pointer", // Only clickable if unread
         isDeleting ? "scale-95 opacity-0" : "scale-100 opacity-100", // Deletion animation
       )}
@@ -385,7 +391,7 @@ const Notifications = () => {
         )}
       >
         {error && (
-          <div className="flex items-center justify-center rounded border border-amber-700 bg-amber-900/30 p-4 text-center text-amber-200">
+          <div className="flex items-center justify-center rounded-full border border-amber-700 bg-amber-900/30 p-4 text-center text-amber-200">
             <XCircleIcon className="mr-2 h-5 w-5 flex-shrink-0 text-amber-400" />
             <span>{error}</span>
             <button
@@ -399,7 +405,7 @@ const Notifications = () => {
       </div>
 
       <div className="flex flex-col transition-opacity duration-300">
-        <div className="bg-gray-800">
+        <div className="rounded-lg bg-gray-800 shadow-lg">
           {isLoading ? (
             <div className="divide-y divide-gray-800">
               <SkeletonRow />
@@ -408,10 +414,12 @@ const Notifications = () => {
             </div>
           ) : hasNotifications || deletingIds.size > 0 ? (
             <div className="divide-y divide-gray-800">
-              {notificationsList.map((notification) => (
+              {notificationsList.map((notification, i) => (
                 <NotificationRow
                   key={notification.id}
                   {...notification}
+                  isFirst={i === 0}
+                  isLast={i === notificationsList.length - 1}
                   onDelete={handleDeleteNotification}
                   onMarkRead={handleMarkAsRead}
                   isDeleting={deletingIds.has(notification.id)}

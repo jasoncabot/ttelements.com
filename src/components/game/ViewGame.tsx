@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useAuth } from "../../providers/hooks";
 import { AuthStatus } from "../../services/AuthService";
 import {
-  CardPlayedEvent,
   ChooseCardsRequest,
   GameCommand,
   GameEvent,
@@ -19,9 +18,13 @@ import PickInProgressView from "./PickInProgressView";
 import TradingView from "./TradingView";
 import WaitingForOpponentView from "./WaitingForOpponentView";
 import WinningView from "./WinningView";
+import { GameUpdateByCardResponse } from "../../shared/games";
 
 const ViewGame = () => {
   const [game, setGame] = useState<GameResponse | null>(null);
+  const [gameUpdate, setGameUpdate] = useState<GameUpdateByCardResponse | null>(
+    null,
+  );
   const { fetchData } = useAuth();
   const { showMessage } = useMessageBanner();
 
@@ -49,8 +52,7 @@ const ViewGame = () => {
     if (gameId) {
       fetchGame();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameId]);
+  }, [gameId, fetchData, showMessage]);
 
   const [socketToken, setSocketToken] = useState<string | null>(null);
   useEffect(() => {
@@ -75,66 +77,97 @@ const ViewGame = () => {
     if (gameId) {
       createSocketToken();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameId]);
+  }, [gameId, fetchData, showMessage]);
 
-  const handleEventReceived = (event: GameEvent) => {
-    switch (event.type) {
-      case "state-changed": {
-        const gameResponse = event.data as GameResponse;
-        setGame(gameResponse);
-        return;
+  const handleEventReceived = useCallback(
+    (event: GameEvent) => {
+      switch (event.type) {
+        case "state-changed": {
+          setGame(event.data);
+          return;
+        }
+        case "card-played": {
+          setGameUpdate(event.data);
+          return;
+        }
+        case "error": {
+          const message = event.data as string;
+          console.error(message);
+          showMessage(message);
+          return;
+        }
       }
-      case "card-played": {
-        const cardPlayedResponse = event.data as CardPlayedEvent;
-        console.log("doing flips " + cardPlayedResponse.space);
-        return;
-      }
-      case "error": {
-        const message = event.data as string;
-        console.error(message);
-        showMessage(message);
-        return;
-      }
-    }
-  };
+    },
+    [showMessage],
+  ); // setGame and setGameUpdate are stable and don't need to be dependencies
 
   const [socket, setSocket] = useState<WebSocket | null>(null);
   useEffect(() => {
-    const connectToSocket = async () => {
-      // connect to the websocket
-      const ws = new WebSocket(
+    // Ensure we have the necessary info to connect
+    if (!socketToken || !gameId) {
+      return;
+    }
+
+    let wsInstance: WebSocket | null = null;
+
+    const connectToSocket = () => {
+      console.log("Attempting to connect WebSocket...");
+      wsInstance = new WebSocket(
         `${import.meta.env.VITE_WS_ENDPOINT}/games/${gameId}/ws?token=${socketToken}`,
         [],
       );
-      ws.onopen = () => {
-        setSocket(ws);
-      };
-      ws.onmessage = (message) => {
-        const event = JSON.parse(message.data) as GameEvent;
 
-        handleEventReceived(event);
+      wsInstance.onopen = () => {
+        console.log("WebSocket connection established.");
+        setSocket(wsInstance); // Update state with the live socket
       };
-      ws.onclose = () => {
-        setSocketToken(null);
-        setSocket(null);
+
+      wsInstance.onmessage = (message) => {
+        try {
+          const event = JSON.parse(message.data) as GameEvent;
+          handleEventReceived(event);
+        } catch (error) {
+          console.error("Failed to parse WebSocket message:", error);
+        }
       };
-      ws.onerror = (error) => {
-        console.log("websocket error", error);
+
+      wsInstance.onclose = (event) => {
+        console.log("WebSocket connection closed.", event.code, event.reason);
+        // Only clear the socket state if it's the current instance that closed
+        setSocket((currentSocket) =>
+          currentSocket === wsInstance ? null : currentSocket,
+        );
+        wsInstance = null;
+        // Optionally reset token if closure was unexpected, needs careful handling
+        // if (!event.wasClean) { setSocketToken(null); }
+      };
+
+      wsInstance.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        wsInstance?.close(); // Attempt to close on error
+        setSocket((currentSocket) =>
+          currentSocket === wsInstance ? null : currentSocket,
+        );
+        wsInstance = null;
       };
     };
-    if (socketToken) {
-      connectToSocket();
-    }
+
+    connectToSocket();
+
+    // Cleanup function: Called on unmount or when dependencies change.
     return () => {
-      socket?.close();
-      setSocket(null);
+      console.log("Cleanup: Closing WebSocket connection...");
+      if (wsInstance && wsInstance.readyState < WebSocket.CLOSING) {
+        wsInstance.close(); // Close the specific WebSocket instance created in this effect run
+      }
+      wsInstance = null; // Clear the local reference
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socketToken]);
+    // Dependencies: Effect re-runs if any of these change.
+  }, [socketToken, gameId, handleEventReceived]); // Added gameId and handleEventReceived
 
   const sendCommand = (command: GameCommand) => {
-    if (socket) {
+    // Use the socket from state, ensuring it's open before sending
+    if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(command));
       return true;
     }
@@ -267,13 +300,19 @@ const ViewGame = () => {
       }
     }
     case "InProgress":
-      return <GameDetails game={game} onPlayCard={handlePlayCard} />;
+      return (
+        <GameDetails
+          game={game}
+          updates={gameUpdate}
+          onPlayCard={handlePlayCard}
+        />
+      );
     case "Trading":
       return <TradingView gameId={game.id} onCardsChosen={handleTradeCards} />;
     case "Completed":
       return (
         <div>
-          <GameDetails game={game} onPlayCard={() => {}} />
+          <GameDetails game={game} updates={null} onPlayCard={() => {}} />
           <div className="overflow-none absolute top-0 left-0 z-10 h-full w-full bg-white/30 backdrop-blur-sm"></div>
           <div className="align-center absolute top-0 left-0 z-20 flex h-full w-full items-center justify-center">
             <div className="rounded-lg bg-gray-900 shadow-lg">

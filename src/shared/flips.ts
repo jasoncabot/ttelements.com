@@ -1,46 +1,11 @@
-import { GameResponse, GameRule } from "./games";
+import { CardPlayedResponse, GameResponse, GameRule } from "./games";
 
-interface Change {
+export interface Change {
   type: "place" | "flip";
   direction: "none" | "up" | "down" | "left" | "right";
 }
 
 export type Position = number;
-
-// The order in which the changes happen is defined by the array
-// for example the following defines a card played in the top left space
-// the flips the 2 cards touching it to the left and below it
-// these in turn then flip the card in the center
-
-/*
-
-    | 0*| 1 | 2 |
-    | 3 | 4 | 5 |
-    | 6 | 7 | 8 |
-
-    | 0 | 1*| 2 |
-    | 3*| 4 | 5 |
-    | 6 | 7 | 8 |
-
-    | 0 | 1 | 2 |
-    | 3 | 4*| 5 |
-    | 6 | 7 | 8 |
-
-[
-    { 
-        0: { type: "place", direction: "none" } 
-    },
-    {
-        1: { type: "flip", direction: "left" },
-        3: { type: "flip", direction: "up" },
-    },
-    { 
-        4: { type: "flip", direction: "left" } 
-    }
-]
-
-*/
-export type GameUpdateResponse = Map<Position, Change>[];
 
 // A smaller version of the Card with values calculated after elemental has been applied
 interface CardInSpace {
@@ -53,8 +18,8 @@ interface CardInSpace {
 
 const processFlips: (
   game: GameResponse,
-  space: number
-) => GameUpdateResponse = (game, space) => {
+  space: number,
+) => CardPlayedResponse = (game, space) => {
   const { board, rules } = game;
 
   // calculate an array of CardInSpace
@@ -92,9 +57,9 @@ const processFlips: (
 const doSpecialFlipsForSpace = (
   board: CardInSpace[],
   space: number,
-  rules: GameRule[]
+  rules: GameRule[],
 ) => {
-  const updates: Map<Position, Change> = new Map();
+  const updates: Record<Position, Change> = {};
 
   const playedCard = board[space];
 
@@ -126,50 +91,77 @@ const doSpecialFlipsForSpace = (
         playedCard.right === 10);
 
     if (sameUp && (sameLeft || sameDown || sameRight)) {
-      updates.set(space - 3, { type: "flip", direction: "down" });
+      updates[space - 3] = { type: "flip", direction: "down" };
       if (cardAbove) cardAbove.owner = playedCard.owner;
     }
 
     if (sameDown && (sameUp || sameLeft || sameRight)) {
-      updates.set(space + 3, { type: "flip", direction: "up" });
+      updates[space + 3] = { type: "flip", direction: "up" };
       if (cardBelow) cardBelow.owner = playedCard.owner;
     }
 
     if (sameLeft && (sameUp || sameDown || sameRight)) {
-      updates.set(space - 1, { type: "flip", direction: "right" });
+      updates[space - 1] = { type: "flip", direction: "right" };
       if (cardLeft) cardLeft.owner = playedCard.owner;
     }
 
     if (sameRight && (sameUp || sameDown || sameLeft)) {
-      updates.set(space + 1, { type: "flip", direction: "left" });
+      updates[space + 1] = { type: "flip", direction: "left" };
       if (cardRight) cardRight.owner = playedCard.owner;
     }
   }
 
   if (rules.includes("plus") || rules.includes("pluswall")) {
+    const sumUp = cardAbove?.down
+      ? cardAbove.down + playedCard.up!
+      : rules.includes("pluswall")
+        ? playedCard.up! + 10
+        : undefined;
+    const sumDown = cardBelow?.up
+      ? cardBelow.up + playedCard.down!
+      : rules.includes("pluswall")
+        ? playedCard.down! + 10
+        : undefined;
+    const sumLeft = cardLeft?.right
+      ? cardLeft.right + playedCard.left!
+      : rules.includes("pluswall")
+        ? playedCard.left! + 10
+        : undefined;
+    const sumRight = cardRight?.left
+      ? cardRight.left + playedCard.right!
+      : rules.includes("pluswall")
+        ? playedCard.right! + 10
+        : undefined;
 
-    const sumUp = cardAbove?.down ? cardAbove.down + playedCard.up! : (rules.includes("pluswall") ? playedCard.up! + 10 : undefined);
-    const sumDown = cardBelow?.up ? cardBelow.up + playedCard.down! : (rules.includes("pluswall") ? playedCard.down! + 10 : undefined);
-    const sumLeft = cardLeft?.right ? cardLeft.right + playedCard.left! : (rules.includes("pluswall") ? playedCard.left! + 10 : undefined);
-    const sumRight = cardRight?.left ? cardRight.left + playedCard.right! : (rules.includes("pluswall") ? playedCard.right! + 10 : undefined);
-
-    if (sumUp && (sumLeft === sumUp || sumDown === sumUp || sumRight === sumUp)) {
-      updates.set(space - 3, { type: "flip", direction: "down" });
+    if (
+      sumUp &&
+      (sumLeft === sumUp || sumDown === sumUp || sumRight === sumUp)
+    ) {
+      updates[space - 3] = { type: "flip", direction: "down" };
       if (cardAbove) cardAbove.owner = playedCard.owner;
     }
 
-    if (sumDown && (sumUp === sumDown || sumLeft === sumDown || sumRight === sumDown)) {
-      updates.set(space + 3, { type: "flip", direction: "up" });
+    if (
+      sumDown &&
+      (sumUp === sumDown || sumLeft === sumDown || sumRight === sumDown)
+    ) {
+      updates[space + 3] = { type: "flip", direction: "up" };
       if (cardBelow) cardBelow.owner = playedCard.owner;
     }
 
-    if (sumLeft && (sumUp === sumLeft || sumDown === sumLeft || sumRight === sumLeft)) {
-      updates.set(space - 1, { type: "flip", direction: "right" });
+    if (
+      sumLeft &&
+      (sumUp === sumLeft || sumDown === sumLeft || sumRight === sumLeft)
+    ) {
+      updates[space - 1] = { type: "flip", direction: "right" };
       if (cardLeft) cardLeft.owner = playedCard.owner;
     }
 
-    if (sumRight && (sumUp === sumRight || sumDown === sumRight || sumLeft === sumRight)) {
-      updates.set(space + 1, { type: "flip", direction: "left" });
+    if (
+      sumRight &&
+      (sumUp === sumRight || sumDown === sumRight || sumLeft === sumRight)
+    ) {
+      updates[space + 1] = { type: "flip", direction: "left" };
       if (cardRight) cardRight.owner = playedCard.owner;
     }
   }
@@ -178,7 +170,7 @@ const doSpecialFlipsForSpace = (
 };
 
 const doBasicFlipsForSpace = (board: CardInSpace[], space: number) => {
-  const updates: Map<Position, Change> = new Map();
+  const updates: Record<Position, Change> = {};
 
   // calculate flips for this space
   const playedCard = board[space];
@@ -194,7 +186,7 @@ const doBasicFlipsForSpace = (board: CardInSpace[], space: number) => {
     playedCard.owner !== cardRight.owner
   ) {
     if (playedCard.right > cardRight.left) {
-      updates.set(space + 1, { type: "flip", direction: "left" });
+      updates[space + 1] = { type: "flip", direction: "left" };
       board[space + 1].owner = playedCard.owner;
     }
   }
@@ -205,7 +197,7 @@ const doBasicFlipsForSpace = (board: CardInSpace[], space: number) => {
     playedCard.owner !== cardLeft.owner
   ) {
     if (playedCard.left > cardLeft.right) {
-      updates.set(space - 1, { type: "flip", direction: "right" });
+      updates[space - 1] = { type: "flip", direction: "right" };
       board[space - 1].owner = playedCard.owner;
     }
   }
@@ -216,7 +208,7 @@ const doBasicFlipsForSpace = (board: CardInSpace[], space: number) => {
     playedCard.owner !== cardAbove.owner
   ) {
     if (playedCard.up > cardAbove.down) {
-      updates.set(space - 3, { type: "flip", direction: "down" });
+      updates[space - 3] = { type: "flip", direction: "down" };
       board[space - 3].owner = playedCard.owner;
     }
   }
@@ -227,7 +219,7 @@ const doBasicFlipsForSpace = (board: CardInSpace[], space: number) => {
     playedCard.owner !== cardBelow.owner
   ) {
     if (playedCard.down > cardBelow.up) {
-      updates.set(space + 3, { type: "flip", direction: "up" });
+      updates[space + 3] = { type: "flip", direction: "up" };
       board[space + 3].owner = playedCard.owner;
     }
   }
@@ -238,50 +230,52 @@ const doBasicFlipsForSpace = (board: CardInSpace[], space: number) => {
 const calculateFlips: (
   board: CardInSpace[],
   space: number,
-  rules: GameRule[]
-) => GameUpdateResponse = (
+  rules: GameRule[],
+) => CardPlayedResponse = (
   board: CardInSpace[],
   space: number,
-  rules: GameRule[]
+  rules: GameRule[],
 ) => {
   const touchedSpaces = new Set<Position>();
 
-  const firstPlay = new Map<Position, Change>();
-  firstPlay.set(space, { type: "place", direction: "none" });
+  const firstPlay: Record<Position, Change> = {};
+  firstPlay[space] = { type: "place", direction: "none" };
 
-  const response: GameUpdateResponse = [firstPlay];
+  const response: CardPlayedResponse = [firstPlay];
 
   // check special flips
   const specialFlips = doSpecialFlipsForSpace(board, space, rules);
-  if (specialFlips.size > 0) {
+  if (Object.keys(specialFlips).length > 0) {
     response.push(specialFlips);
     touchedSpaces.add(space);
 
     // calculate combos
     if (rules.includes("combo")) {
-      const allMergedComboFlips = (
-        touchingSpaces: IterableIterator<number>
-      ) => {
-        const mergedFlips: Map<Position, Change> = new Map();
+      const allMergedComboFlips = (touchingSpaces: Iterable<number>) => {
+        const mergedFlips: Record<Position, Change> = {};
 
-        for (let space of touchingSpaces) {
+        for (const space of touchingSpaces) {
           if (touchedSpaces.has(space)) continue;
 
           const flips = doBasicFlipsForSpace(board, space);
-          flips.forEach((change, space) => {
-            touchedSpaces.add(space);
-            mergedFlips.set(space, change);
+          Object.entries(flips).forEach(([space, change]) => {
+            touchedSpaces.add(Number(space));
+            mergedFlips[Number(space)] = change;
           });
         }
-        return mergedFlips.size > 0 ? mergedFlips : undefined;
+        return Object.keys(mergedFlips).length > 0 ? mergedFlips : undefined;
       };
 
       // start by finding all the special flips
-      let comboFlips = allMergedComboFlips(specialFlips.keys());
+      let comboFlips = allMergedComboFlips(
+        Object.keys(specialFlips).map(Number).values(),
+      );
       while (comboFlips != undefined) {
         response.push(comboFlips);
         // Find the next set of combo flips
-        comboFlips = allMergedComboFlips(comboFlips.keys());
+        comboFlips = allMergedComboFlips(
+          Object.keys(comboFlips).map(Number).values(),
+        );
       }
     }
   }
@@ -289,7 +283,7 @@ const calculateFlips: (
   // check basic flips
   if (!touchedSpaces.has(space)) {
     const basicFlips = doBasicFlipsForSpace(board, space);
-    if (basicFlips.size > 0) {
+    if (Object.keys(basicFlips).length > 0) {
       response.push(basicFlips);
       touchedSpaces.add(space);
     }
@@ -298,4 +292,4 @@ const calculateFlips: (
   return response;
 };
 
-export { processFlips, calculateFlips };
+export { calculateFlips, processFlips };

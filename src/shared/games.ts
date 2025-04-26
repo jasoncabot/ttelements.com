@@ -1,4 +1,5 @@
 import { CardEdition, CardElement } from "./cards";
+import { Change, Position } from "./flips";
 
 export type GameState =
   | "WaitingForOpponent"
@@ -63,6 +64,45 @@ export type ViewableCardResponse = {
   element: CardElement;
 };
 
+// The order in which the changes happen is defined by the array
+// for example the following defines a card played in the top left space
+// the flips the 2 cards touching it to the left and below it
+// these in turn then flip the card in the center
+
+/*
+
+    | 0*| 1 | 2 |
+    | 3 | 4 | 5 |
+    | 6 | 7 | 8 |
+
+    | 0 | 1*| 2 |
+    | 3*| 4 | 5 |
+    | 6 | 7 | 8 |
+
+    | 0 | 1 | 2 |
+    | 3 | 4*| 5 |
+    | 6 | 7 | 8 |
+
+[
+    { 
+        0: { type: "place", direction: "none" } 
+    },
+    {
+        1: { type: "flip", direction: "left" },
+        3: { type: "flip", direction: "up" },
+    },
+    { 
+        4: { type: "flip", direction: "left" } 
+    }
+]
+
+*/
+export type CardPlayedResponse = Record<Position, Change>[];
+export type GameUpdateByCardResponse = {
+  changes: CardPlayedResponse;
+  finalState: GameResponse;
+};
+
 export type CardResponse = {
   hidden: boolean;
   card?: ViewableCardResponse;
@@ -98,18 +138,22 @@ export type GameCommand = {
   data: JoinRequest | ChooseCardsRequest | PlayCardRequest | TradeCardsRequest;
 };
 
-export type CardPlayedEvent = {
-  space: number;
-  card: ViewableCardResponse;
-};
-
 // things that can happen in a game: (events)
 // - state changed
 // - card played
-export type GameEvent = {
-  type: "state-changed" | "card-played" | "error";
-  data: GameResponse | CardPlayedEvent | string;
-};
+export type GameEvent =
+  | {
+      type: "state-changed";
+      data: GameResponse;
+    }
+  | {
+      type: "card-played";
+      data: GameUpdateByCardResponse;
+    }
+  | {
+      type: "error";
+      data: string;
+    };
 
 export type GameTradeRule = "none" | "one" | "direct" | "all";
 
