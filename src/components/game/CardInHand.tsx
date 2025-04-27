@@ -1,5 +1,4 @@
 import { classNames } from "..";
-import cardBack from "../../assets/images/back.svg";
 import { ViewableCardResponse } from "../../shared";
 import CardDetail from "../CardDetail";
 
