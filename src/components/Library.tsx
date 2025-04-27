@@ -76,6 +76,10 @@ const Library = () => {
             .get(card.edition)
             ?.set(card.level, mapping.get(card.edition)?.get(card.level) || []);
           mapping.get(card.edition)?.get(card.level)?.push(libraryCard);
+          mapping
+            .get(card.edition)
+            ?.set(0, mapping.get(card.edition)?.get(0) || []);
+          mapping.get(card.edition)?.get(0)?.push(libraryCard); // level = 0 all cards
         });
 
         setCards(mapping);

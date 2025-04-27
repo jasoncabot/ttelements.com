@@ -1,12 +1,27 @@
 import { useEffect, useState } from "react";
 import { classNames } from "..";
 
-const ScoreBoard: React.FC<{
+export type ScoreBoardProps = {
   isMyTurn: boolean;
   endsAt: Date;
-  me: { name: string; score: number; emailHash: string };
-  you: { name: string; score: number; emailHash: string };
-}> = ({ isMyTurn, endsAt, me, you }) => {
+  me: {
+    name: string;
+    score: number;
+    emailHash: string;
+  };
+  you: {
+    name: string;
+    score: number;
+    emailHash: string;
+  };
+};
+
+const ScoreBoard: React.FC<ScoreBoardProps> = ({
+  isMyTurn,
+  endsAt,
+  me,
+  you,
+}) => {
   const [remainingTime, setRemainingTime] = useState("00:00");
   useEffect(() => {
     const end = new Date(endsAt);
@@ -18,7 +33,7 @@ const ScoreBoard: React.FC<{
       setRemainingTime(
         `${minutes.toString().padStart(2, "0")}:${seconds
           .toString()
-          .padStart(2, "0")}`
+          .padStart(2, "0")}`,
       );
     }, 250);
     return () => clearInterval(interval);
@@ -29,11 +44,11 @@ const ScoreBoard: React.FC<{
       <div className="flex flex-row items-center text-gray-900">
         <img
           className={classNames(
-            "ml-1 mt-1 h-6 w-6 rounded-full md:my-2 md:h-12 md:w-12",
+            "mt-1 ml-1 h-6 w-6 rounded-full md:my-2 md:h-12 md:w-12",
             {
               "opacity-60": !isMyTurn,
               "border-grey-500 border": isMyTurn,
-            }
+            },
           )}
           src={`https://www.gravatar.com/avatar/${me.emailHash}?d=retro`}
           title={me.name}
@@ -52,11 +67,11 @@ const ScoreBoard: React.FC<{
       <div className="flex flex-row items-center text-gray-900">
         <img
           className={classNames(
-            "mr-1 mt-1 h-6 w-6 rounded-full md:my-2 md:mr-0 md:h-12 md:w-12",
+            "mt-1 mr-1 h-6 w-6 rounded-full md:my-2 md:mr-0 md:h-12 md:w-12",
             {
               "opacity-60": isMyTurn,
               "border-grey-500 border": !isMyTurn,
-            }
+            },
           )}
           src={`https://www.gravatar.com/avatar/${you.emailHash}?d=retro`}
           title={you.name}

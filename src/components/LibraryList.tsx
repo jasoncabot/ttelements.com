@@ -21,6 +21,10 @@ const LibraryList: React.FC<LibraryListProps> = ({ data }) => {
   const [selectedEdition, setSelectedEdition] = useState<CardEdition>("ff8");
   const [selectedLevel, setSelectedLevel] = useState<CardLevel>(1);
 
+  const levels = Array.from(data.get(selectedEdition)?.keys() || []).sort(
+    (a, b) => a - b,
+  );
+
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Header and Edition Selector */}
@@ -97,23 +101,21 @@ const LibraryList: React.FC<LibraryListProps> = ({ data }) => {
           >
             <MenuItems className="ring-opacity-5 absolute left-0 z-10 mt-2 max-h-60 w-full origin-top-right overflow-y-auto rounded-md bg-gray-800 shadow-lg ring-1 ring-black focus:outline-none">
               <div className="max-h-60 overflow-y-auto py-1">
-                {Array.from(data.get(selectedEdition)?.keys() || []).map(
-                  (level) => (
-                    <MenuItem key={level}>
-                      {({ active }) => (
-                        <button
-                          onClick={() => setSelectedLevel(level)}
-                          className={classNames(
-                            active ? "bg-gray-700 text-white" : "text-gray-300",
-                            "block w-full cursor-pointer px-4 py-2 text-left text-sm",
-                          )}
-                        >
-                          {nameForLevel(level, selectedEdition)}
-                        </button>
-                      )}
-                    </MenuItem>
-                  ),
-                )}
+                {levels.map((level) => (
+                  <MenuItem key={level}>
+                    {({ active }) => (
+                      <button
+                        onClick={() => setSelectedLevel(level)}
+                        className={classNames(
+                          active ? "bg-gray-700 text-white" : "text-gray-300",
+                          "block w-full cursor-pointer px-4 py-2 text-left text-sm",
+                        )}
+                      >
+                        {nameForLevel(level, selectedEdition)}
+                      </button>
+                    )}
+                  </MenuItem>
+                ))}
               </div>
             </MenuItems>
           </Transition>
@@ -126,7 +128,7 @@ const LibraryList: React.FC<LibraryListProps> = ({ data }) => {
           className="flex space-x-1 rounded-lg bg-gray-700 p-1"
           aria-label="Tabs"
         >
-          {Array.from(data.get(selectedEdition)?.keys() || []).map((level) => (
+          {levels.map((level) => (
             <button
               key={level}
               onClick={(e) => {

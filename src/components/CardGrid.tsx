@@ -9,6 +9,7 @@ import cardBack from "../assets/images/back.svg";
 import { cardImageFromKind, numberImage } from "../assets/images/cards";
 import CardDetail from "./CardDetail";
 import { LibraryCardProps } from "./Library";
+import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 
 // Define the props for the new CardModelViewer component
 interface CardModelViewerProps {
@@ -106,7 +107,7 @@ const CardMeshContent: React.FC<{
     if (ctx) {
       const grad = ctx.createLinearGradient(0, 0, 0, 256);
       if (owned) {
-        grad.addColorStop(0, "#3b82f6"); // blue-500
+        grad.addColorStop(0, "#e2f1ff"); // blue-100
         grad.addColorStop(1, "#1e40af"); // blue-900
       } else {
         grad.addColorStop(0, "#d1d5db"); // gray-300
@@ -271,49 +272,64 @@ const GridCardItem: React.FC<GridCardItemProps> = memo(
       <div
         key={card.kind} // Key should ideally be on the component usage in the map
         className="cursor-pointer overflow-hidden rounded-lg bg-gray-800 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-        onClick={() => onSelect(card)}
+        onClick={() => card.owned && onSelect(card)} // Only allow selection if owned
       >
         <div className="relative aspect-square w-full">
-          <CardDetail
-            className={card.owned ? "opacity-100" : "opacity-20"}
-            colour={card.colour}
-            edition={card.edition}
-            kind={card.kind}
-            up={card.up}
-            down={card.down}
-            left={card.left}
-            right={card.right}
-            name={card.name}
-          />
-          {/* Overlay for name/count on hover (optional) */}
-          <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 opacity-0 transition-opacity duration-300">
-            {card.acquiredAt && (
-              <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-gray-900 p-1.5 text-xs font-medium text-amber-500">
-                {quantity >= 1 && ` x${quantity}`}
-              </div>
-            )}
+          {card.owned ? (
+            <>
+              <CardDetail
+                className={"opacity-100"} // Always full opacity when rendered here
+                colour={card.colour}
+                edition={card.edition}
+                kind={card.kind}
+                up={card.up}
+                down={card.down}
+                left={card.left}
+                right={card.right}
+                name={card.name}
+              />
+              {/* Overlay for name/count on hover (optional) */}
+              <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
+                {card.acquiredAt && (
+                  <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-gray-900 p-1.5 text-xs font-medium text-amber-500">
+                    {quantity >= 1 && ` x${quantity}`}
+                  </div>
+                )}
 
-            {card.acquiredAt && (
-              <div className="absolute bottom-2 left-2 flex items-center justify-center rounded-full bg-black p-1.5">
-                <div className="flex items-center">
-                  <ShieldCheckIcon className="h-4 w-4 text-amber-500" />
-                  <span className="ml-1 text-[10px] font-medium text-amber-400">
-                    {new Date(card.acquiredAt).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "2-digit",
-                    })}
-                  </span>
-                </div>
+                {card.acquiredAt && (
+                  <div className="absolute bottom-2 left-2 flex items-center justify-center rounded-full bg-black p-1.5">
+                    <div className="flex items-center">
+                      <ShieldCheckIcon className="h-4 w-4 text-amber-500" />
+                      <span className="ml-1 text-[10px] font-medium text-amber-400">
+                        {new Date(card.acquiredAt).toLocaleDateString(
+                          undefined,
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "2-digit",
+                          },
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          {/* Basic info visible when not hovered */}
-          <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-1 transition-opacity duration-300">
-            <h3 className="truncate text-center text-xs font-medium text-white">
-              {card.name}
-            </h3>
-          </div>
+              {/* Basic info visible when not hovered */}
+              <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-1 transition-opacity duration-300 group-hover:opacity-0">
+                <h3 className="truncate text-center text-xs font-medium text-white">
+                  {card.name}
+                </h3>
+              </div>
+            </>
+          ) : (
+            // Render placeholder for unowned cards
+            <div className="flex h-full w-full flex-col items-center justify-center bg-gray-700 opacity-50">
+              <QuestionMarkCircleIcon className="h-1/2 w-1/2 text-gray-400" />
+              <h3 className="absolute bottom-1 w-full truncate p-1 text-center text-xs font-medium text-gray-300">
+                {card.name}
+              </h3>
+            </div>
+          )}
         </div>
       </div>
     );

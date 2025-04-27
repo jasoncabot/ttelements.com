@@ -90,15 +90,17 @@ const Home: React.FC = () => {
           ))}
         </div>
       </div>
-      <div className="mb-8 mt-16 flex items-center justify-between rounded-lg bg-gray-800/50 p-4 shadow-md">
-        <h1 className="text-3xl font-bold tracking-tight text-white">Latest News</h1>
+      <div className="mt-16 mb-8 flex items-center justify-between rounded-lg bg-gray-800/50 p-4 shadow-md">
+        <h1 className="text-3xl font-bold tracking-tight text-white">
+          Latest News
+        </h1>
       </div>
       <div className="flex flex-col transition-opacity duration-300">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {news.map(({ title, description }) => (
             <div
               key={title}
-              className="overflow-hidden rounded-lg bg-white/90 shadow-lg border border-gray-200 hover:shadow-xl transition"
+              className="overflow-hidden rounded-lg border border-gray-200 bg-white/90 shadow-lg transition hover:shadow-xl"
             >
               <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-900">{title}</h3>

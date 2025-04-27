@@ -16,11 +16,9 @@ const CardInHand: React.FC<{
 
   if (!card) {
     return (
-      <img
+      <div
         key={key}
-        alt="unknown card"
-        className="m-1 h-full w-full overflow-hidden rounded-md border border-gray-800 shadow-lg shadow-md select-none"
-        src={cardBack}
+        className="m-1 aspect-square h-full w-full overflow-hidden select-none"
       />
     );
   }

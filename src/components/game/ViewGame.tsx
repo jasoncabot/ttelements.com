@@ -99,7 +99,7 @@ const ViewGame = () => {
       }
     },
     [showMessage],
-  ); // setGame and setGameUpdate are stable and don't need to be dependencies
+  );
 
   const [socket, setSocket] = useState<WebSocket | null>(null);
   useEffect(() => {
@@ -138,8 +138,6 @@ const ViewGame = () => {
           currentSocket === wsInstance ? null : currentSocket,
         );
         wsInstance = null;
-        // Optionally reset token if closure was unexpected, needs careful handling
-        // if (!event.wasClean) { setSocketToken(null); }
       };
 
       wsInstance.onerror = (error) => {
@@ -305,6 +303,10 @@ const ViewGame = () => {
           game={game}
           updates={gameUpdate}
           onPlayCard={handlePlayCard}
+          onAnimationComplete={(finalState: GameResponse) => {
+            setGame(finalState);
+            setGameUpdate(null);
+          }}
         />
       );
     case "Trading":
@@ -312,7 +314,12 @@ const ViewGame = () => {
     case "Completed":
       return (
         <div>
-          <GameDetails game={game} updates={null} onPlayCard={() => {}} />
+          <GameDetails
+            game={game}
+            updates={null}
+            onAnimationComplete={(g) => setGame(g)}
+            onPlayCard={() => {}}
+          />
           <div className="overflow-none absolute top-0 left-0 z-10 h-full w-full bg-white/30 backdrop-blur-sm"></div>
           <div className="align-center absolute top-0 left-0 z-20 flex h-full w-full items-center justify-center">
             <div className="rounded-lg bg-gray-900 shadow-lg">

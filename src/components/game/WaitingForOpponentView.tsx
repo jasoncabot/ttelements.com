@@ -3,6 +3,7 @@ import {
   ClipboardIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import { ShareIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useRef, useState } from "react";
 
 const WaitingForOpponentView: React.FC<{
@@ -31,7 +32,25 @@ const WaitingForOpponentView: React.FC<{
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (e) {
-      // fallback: do nothing
+      console.error("Failed to copy text: ", e);
+    }
+  };
+
+  const handleShare = async () => {
+    const url = document.location.toString();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join my game!",
+          text: "Play a game with me!",
+          url,
+        });
+      } catch (e) {
+        console.error("Failed to share: ", e);
+      }
+    } else {
+      // fallback: copy to clipboard
+      handleCopy();
     }
   };
 
@@ -80,10 +99,10 @@ const WaitingForOpponentView: React.FC<{
           <button
             type="button"
             className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-bold text-white shadow hover:bg-amber-600 focus:ring-2 focus:ring-amber-400 focus:outline-none"
-            onClick={handleCopy}
+            onClick={handleShare}
           >
-            <ClipboardIcon className="h-5 w-5" aria-hidden="true" />
-            {copied ? "Copied!" : "Copy Link"}
+            <ShareIcon className="h-5 w-5" aria-hidden="true" />
+            Share
           </button>
         </div>
         <div className="mt-6 text-center text-xs text-gray-300">

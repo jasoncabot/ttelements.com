@@ -35,6 +35,8 @@ export const editions: CardEdition[] = ["ff8"];
 export const nameForLevel = (level: number, edition: CardEdition) => {
   if (edition === "ff8") {
     switch (level) {
+      case 0:
+        return "All";
       case 1:
         return "Level 1";
       case 2:

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router";
 import { GameResponse } from "../../shared";
@@ -21,7 +20,7 @@ const WinningView: React.FC<{ game: GameResponse }> = ({ game }) => {
       </div>
       <Link
         to="/play"
-        className="rounded bg-amber-500 px-4 py-2 font-bold text-white hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+        className="rounded bg-amber-500 px-4 py-2 font-bold text-white hover:bg-amber-600 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none"
       >
         Play again
       </Link>
