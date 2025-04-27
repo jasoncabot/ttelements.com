@@ -13,7 +13,7 @@ import {
   UserDetailsResponse,
   ViewableCardResponse,
 } from "../shared";
-import { PurchaseKind } from "../shared/shop";
+import { PackCosts, PurchaseKind } from "../shared/shop";
 import BoosterPackViewer from "./BoosterPackViewer";
 import CardRevealer from "./CardRevealer";
 import { useMessageBanner } from "./MessageBanner";
@@ -29,53 +29,34 @@ const purchasable: {
     name: "Basic Pack",
     key: "basic",
     description: ["Some cards"],
-    price: 0, //100,
+    price: PackCosts["basic"],
     starCount: 1,
   },
   {
     name: "Premium Pack",
     key: "premium",
     description: ["Some better cards"],
-    price: 0, //500,
+    price: PackCosts["premium"],
     starCount: 2,
   },
   {
     name: "Ultimate Pack",
     key: "ultimate",
     description: ["The best cards"],
-    price: 0, //1000,
+    price: PackCosts["ultimate"],
     starCount: 3,
   },
 ];
 
-const Shop = () => {
+type ShopContentsProps = {
+  points: number;
+};
+
+const ShopContents: React.FC<ShopContentsProps> = ({ points }) => {
   const { fetchData } = useAuth();
   const { showMessage } = useMessageBanner();
 
-  const [points, setPoints] = useState<number>(0);
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const data = await fetchData<UserDetailsResponse>(
-          "get",
-          "/user/details",
-          null,
-          AuthStatus.REQUIRED,
-        );
-        setPoints(data.points);
-      } catch (e: unknown) {
-        if (e instanceof Error) {
-          showMessage(e.message);
-        } else {
-          showMessage("Unknown error occurred while fetching user details");
-        }
-      }
-    };
-    fetchUserDetails();
-  }, [fetchData, showMessage]);
-
   const [purchased, setPurchased] = useState<ViewableCardResponse[]>([]);
-  // State for the booster pack modal
   const [selectedPackKey, setSelectedPackKey] = useState<PurchaseKind | null>(
     null,
   );
@@ -131,11 +112,6 @@ const Shop = () => {
 
   return (
     <div className="flex min-h-screen w-full flex-col p-4 md:p-12">
-      <h1 className="text-3xl font-bold tracking-tight">Buy Cards</h1>
-      <h2 className="text-1xl font-light tracking-tight">
-        You have {points} points
-      </h2>
-
       <Dialog
         open={!!selectedPackKey}
         onClose={handleCloseViewer}
@@ -176,7 +152,7 @@ const Shop = () => {
                 <div className="flex items-center">
                   <CreditCardIcon className="mr-1 h-5 w-5 text-gray-400" />
                   <div className="text-sm font-medium text-gray-400">
-                    {pack.price} points
+                    {pack.price} {pack.price == 1 ? "point" : "points"}
                   </div>
                 </div>
               </div>
@@ -223,6 +199,48 @@ const Shop = () => {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Shop = () => {
+  const { fetchData } = useAuth();
+  const { showMessage } = useMessageBanner();
+  const [points, setPoints] = useState<number>(0);
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const data = await fetchData<UserDetailsResponse>(
+          "get",
+          "/user/details",
+          null,
+          AuthStatus.REQUIRED,
+        );
+        setPoints(data.points);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          showMessage(e.message);
+        } else {
+          showMessage("Unknown error occurred while fetching user details");
+        }
+      }
+    };
+    fetchUserDetails();
+  }, [fetchData, showMessage]);
+
+  return (
+    <div className="flex min-h-screen w-full flex-col p-4 text-gray-300 md:p-12">
+      <div className="mb-8 flex items-center justify-between rounded-lg bg-gray-800/50 p-4 shadow-md">
+        <h1 className="text-3xl font-bold tracking-tight text-white">Shop</h1>
+        <h2>
+          You have {points} {points == 1 ? "point" : "points"}
+        </h2>
+      </div>
+      <div className="flex flex-col transition-opacity duration-300">
+        <div className="rounded-lg bg-gray-800 px-4 py-5 sm:p-6">
+          <ShopContents points={points} />
         </div>
       </div>
     </div>

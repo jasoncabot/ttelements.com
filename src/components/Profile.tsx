@@ -54,7 +54,7 @@ const Profile: React.FC<object> = () => {
                   {name}
                 </h2>
                 <p className="text-sm font-medium text-white">
-                  {points} points
+                  {points} {points == 1 ? 'point' : 'points'}
                 </p>
               </div>
             </div>

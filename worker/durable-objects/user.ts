@@ -18,7 +18,7 @@ import {
 } from "../../src/shared";
 import { resetUserCardsAction, updateCardsAction } from "./card-collection";
 import { generateHash } from "../../src/shared/auth";
-import { PurchaseKind } from "../../src/shared/shop";
+import { PackCosts, PurchaseKind } from "../../src/shared/shop";
 import { rarityMapByEdition } from "../../src/shared/cards";
 
 export const createSignupAction = () => `${durableObjectGameAction("signup")}`;
@@ -200,11 +200,7 @@ export class User extends DurableObject<Env> {
             return error(400, "Unknown type");
           }
 
-          const requiredPoints = {
-            basic: 100,
-            premium: 500,
-            ultimate: 1000,
-          }[req.kind];
+          const requiredPoints = PackCosts[req.kind];
 
           // ensure we have enough points to make this purchase
           const points = (await this.ctx.storage.get<number>(`points`)) || 0;
