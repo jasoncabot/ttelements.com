@@ -24,7 +24,7 @@ import { ProtectedRoute } from "./providers/ProtectedRoute";
 const App = () => {
   return (
     <AuthProvider>
-      <div className="bg-gradient-to-b from-[#D97706] via-[#DB5250] to-[#B84A7B] text-white">
+      <div className="h-screen overflow-y-scroll bg-gradient-to-b from-[#D97706] via-[#DB5250] to-[#B84A7B] text-white">
         <Navigation />
         <MessageBannerProvider>
           <div className="container mx-auto min-h-screen">
