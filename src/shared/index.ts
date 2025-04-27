@@ -2,7 +2,7 @@ export type {
   LoginRequest,
   LoginResponse,
   RefreshTokenRequest,
-  RefreshTokenResponse,
+  RefreshTokenResponse
 } from "./auth";
 export { CardKinds } from "./cards";
 export type { CardEdition, CardElement, CardKindDefinition } from "./cards";
@@ -10,11 +10,10 @@ export type {
   ListOwnedCardsRequest,
   OwnedCardResponse,
   UpdateCardCollectionRequest,
-  UpdateCardCollectionResponse,
+  UpdateCardCollectionResponse
 } from "./collection";
 export { processFlips } from "./flips";
 export type {
-  CardPlayedEvent,
   CardResponse,
   ChooseCardsRequest,
   CreateRequest,
@@ -24,18 +23,18 @@ export type {
   GameRule,
   GameState,
   GameTradeRule,
-  JoinRequest,
   JoinableGame,
+  JoinRequest,
   PlayCardRequest,
   PlayerResponse,
   SpaceResponse,
   TradeCardsRequest,
-  ViewableCardResponse,
+  ViewableCardResponse
 } from "./games";
 export type {
   ConfirmUserSignupRequest,
   UserSignupRequest,
-  UserSignupResponse,
+  UserSignupResponse
 } from "./register";
 export type { PurchaseRequest, PurchaseResponse } from "./shop";
 export type { UserDetailsRequest, UserDetailsResponse } from "./user";
