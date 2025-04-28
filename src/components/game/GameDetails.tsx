@@ -61,7 +61,7 @@ const GameDetails: React.FC<Props> = ({
           clearInterval(interval);
           onAnimationComplete(updates.finalState);
         }
-      }, 600);
+      }, 300);
       return () => clearInterval(interval);
     }
   }, [updates, onAnimationComplete]);
@@ -70,13 +70,22 @@ const GameDetails: React.FC<Props> = ({
   const getAnimationForSpace: (
     spaceIndex: number,
   ) => SpaceUpdate | undefined = (spaceIndex) => {
-    if (animationStep < 0 || !updates) {
+    if (animationStep < 0 || !updates || !updates.changes[animationStep]) {
       return undefined;
     }
-    return {
-      change: updates.changes[animationStep][spaceIndex],
-      updatedSpace: updates.finalState.board[spaceIndex],
-    };
+
+    const changeForSpace = updates.changes[animationStep][spaceIndex];
+
+    // Only return an update if this specific space changed in this step
+    if (changeForSpace) {
+      return {
+        change: changeForSpace,
+        updatedSpace: updates.finalState.board[spaceIndex],
+      };
+    }
+
+    // If no change occurred for this space in this step, return undefined
+    return undefined;
   };
 
   const handleSelection = (index: number) => {
@@ -116,6 +125,12 @@ const GameDetails: React.FC<Props> = ({
           <div className="grid grid-cols-3 grid-rows-3 rounded border border-gray-900 shadow">
             {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
               const update = getAnimationForSpace(i);
+              // Determine the correct 'before' state for the animation
+              const spaceBeforeAnimation =
+                animationStep > 0 && updates
+                  ? updates.finalState.board[i]
+                  : game.board[i]; // Initial state before any animation steps
+
               return (
                 <div
                   key={`b${i}`}
@@ -131,9 +146,10 @@ const GameDetails: React.FC<Props> = ({
                 >
                   <BoardSpace
                     key={`b${i}`}
-                    space={game.board[i]}
-                    onSpaceSelected={() => handlePlayCardAt(i)}
+                    space={spaceBeforeAnimation}
                     update={update}
+                    isMyTurn={game.isYourTurn}
+                    onSpaceSelected={() => handlePlayCardAt(i)}
                   />
                 </div>
               );
