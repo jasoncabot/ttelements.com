@@ -102,8 +102,6 @@ const GameDetails: React.FC<Props> = ({
     setSelectedIndex(undefined);
   };
 
-  const canSeeOpponentsCard = false;
-
   return (
     <div className="mx-auto flex w-full max-w-[800px] flex-col">
       <ScoreBoard {...scoreInfo} />
@@ -112,8 +110,8 @@ const GameDetails: React.FC<Props> = ({
           {myHand.map((holding, cardIndex) => (
             <CardInHand
               key={"me-" + cardIndex}
-              visible={true}
-              card={holding.card}
+              isMyHand={true}
+              holding={holding}
               index={cardIndex}
               selectedIndex={selectedIndex}
               onSelected={handleSelection}
@@ -121,7 +119,7 @@ const GameDetails: React.FC<Props> = ({
           ))}
         </div>
 
-        <div className="flex aspect-square w-full flex-grow flex-col justify-center md:px-4 lg:px-12">
+        <div className="flex aspect-square w-full flex-grow flex-col justify-center p-1 md:px-4 lg:px-12">
           <div className="grid grid-cols-3 grid-rows-3 rounded border border-gray-900 shadow">
             {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
               const update = getAnimationForSpace(i);
@@ -161,8 +159,8 @@ const GameDetails: React.FC<Props> = ({
           {opponentHand.map((holding, cardIndex) => (
             <CardInHand
               key={"theirs-" + cardIndex}
-              visible={canSeeOpponentsCard}
-              card={holding.card}
+              isMyHand={false}
+              holding={holding}
               index={cardIndex}
             />
           ))}

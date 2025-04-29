@@ -480,17 +480,20 @@ const playerView = (game: GameEntry, userId: string) => {
   const toCardResponse = (
     card: CardEntry,
     hidden: boolean,
+    played: boolean,
     chosen: boolean,
   ) => {
     if (hidden) {
       return {
         hidden: true,
+        played: played,
         chosen: chosen,
       } as CardResponse;
     }
 
     return {
       hidden: false,
+      played: played,
       card: toViewableCard(card),
       chosen: chosen,
     } as CardResponse;
@@ -531,19 +534,24 @@ const playerView = (game: GameEntry, userId: string) => {
   const youPlayedCards = you?.playedIndexes || [];
   const yourCards: CardResponse[] =
     you?.cards.map((card, index) =>
-      toCardResponse(card, youPlayedCards.includes(index), true),
+      toCardResponse(card, false, youPlayedCards.includes(index), true),
     ) || [];
   for (let i = yourCards.length; i < 5; i++) {
-    yourCards.push(toCardResponse({} as CardEntry, true, false));
+    yourCards.push(toCardResponse({} as CardEntry, false, true, false));
   }
-  const hidden = !canSeeOpponentsCards;
+
   const opponentPlayedCards = opponent?.playedIndexes || [];
   const opponentCards: CardResponse[] =
     opponent?.cards.map((card, index) =>
-      toCardResponse(card, opponentPlayedCards.includes(index) || hidden, true),
+      toCardResponse(
+        card,
+        opponentPlayedCards.includes(index) || !canSeeOpponentsCards,
+        opponentPlayedCards.includes(index),
+        true,
+      ),
     ) || [];
   for (let i = opponentCards.length; i < 5; i++) {
-    opponentCards.push(toCardResponse({} as CardEntry, true, false));
+    opponentCards.push(toCardResponse({} as CardEntry, true, true, false));
   }
   return {
     id: game.id,
@@ -672,6 +680,8 @@ const handlePlayCard = async (
       listEndGameAction(game.id, game.players[0].id, game.players[1].id),
       { method: "POST" },
     );
+
+    // increase both players points by 1
   }
 
   onCardPlayed(game, flipResponse, connections);

@@ -105,6 +105,7 @@ export type GameUpdateByCardResponse = {
 
 export type CardResponse = {
   hidden: boolean;
+  played: boolean;
   card?: ViewableCardResponse;
   chosen: boolean;
 };
